@@ -207,8 +207,7 @@ public class ConPtyBackend : ISessionBackend
 
         try
         {
-            session.Input.Write(text);
-            session.Input.Write('\r'); // Enter
+            session.Input.Write(text + "\r");
             session.Input.Flush();
             return null;
         }
@@ -441,7 +440,7 @@ public class ConPtyBackend : ISessionBackend
             var buffer = new RingBuffer();
             var screen = new VtScreenBuffer(size.X, size.Y);
             var inputStream = new FileStream(inputWrite, FileAccess.Write);
-            var inputWriter = new StreamWriter(inputStream, Encoding.UTF8)
+            var inputWriter = new StreamWriter(inputStream, new System.Text.UTF8Encoding(false))
             {
                 AutoFlush = true
             };
