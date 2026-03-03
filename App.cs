@@ -74,8 +74,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
         _groupHandler = new GroupHandler(
             _state, _config, _flow, backend, LoadSessions, Render,
             () => _lastSelectedSession = null,
-            () => { },
-            ResizeGridPanes);
+            () => { });
 
         _claudeAvailable = backend.HasClaude();
         if (!_claudeAvailable)

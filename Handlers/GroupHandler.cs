@@ -13,8 +13,7 @@ public class GroupHandler(
     Action loadSessions,
     Action render,
     Action resetPaneCache,
-    Action resetGridCache,
-    Action resizeGridPanes)
+    Action resetGridCache)
 {
     public void Delete()
     {
@@ -573,15 +572,13 @@ public class GroupHandler(
     {
         loadSessions();
 
-        // Position cursor on the new group header
+        // Position cursor on the new group header (expanded by default via InitExpandedGroups)
         var treeItems = state.GetTreeItems();
         var idx = treeItems.FindIndex(t => t is TreeItem.GroupHeader gh && gh.Group.Name == groupName);
         if (idx >= 0)
             state.CursorIndex = idx;
 
-        state.EnterGroupGrid(groupName);
         resetPaneCache();
-        resizeGridPanes();
     }
 
     public void MoveSessionToGroup()
