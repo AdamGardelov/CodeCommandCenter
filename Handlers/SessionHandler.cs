@@ -93,21 +93,7 @@ public class SessionHandler(
             var color = flow.PickColor();
 
             // Step: Skip permissions
-            var skipPermissions = false;
-            if (globalSkip)
-            {
-                AnsiConsole.MarkupLine("[grey70]Global skip-permissions is [white]ON[/] — all sessions use it[/]");
-            }
-            else
-            {
-                FlowHelper.PrintStep(++step, totalSteps, "Skip Permissions");
-                var skipPerms = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
-                        .HighlightStyle(new Style(Color.White, Color.Grey70))
-                        .AddChoices("No", "Yes"));
-                skipPermissions = skipPerms == "Yes";
-            }
+            var skipPermissions = FlowHelper.PromptSkipPermissions(config, ref step, totalSteps);
 
             // Create session
             var effectiveSkip = skipPermissions || globalSkip;

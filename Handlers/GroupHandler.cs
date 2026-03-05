@@ -177,6 +177,7 @@ public class GroupHandler(
 
                     ConfigService.RenameDescription(config, sessionName, newSessionName);
                     ConfigService.RenameColor(config, sessionName, newSessionName);
+                    ConfigService.RenameExcluded(config, sessionName, newSessionName);
                     ConfigService.RenameStartCommit(config, sessionName, newSessionName);
                     ConfigService.RenameRemoteHost(config, sessionName, newSessionName);
                     ConfigService.RenameSkipPermissions(config, sessionName, newSessionName);
@@ -342,10 +343,10 @@ public class GroupHandler(
         if (available.Count == 0)
             throw new FlowCancelledException("All worktrees already have active groups");
 
-        var globalSkip = config.DangerouslySkipPermissions;
-        var totalSteps = globalSkip ? 2 : 3;
+        var totalSteps = config.DangerouslySkipPermissions ? 2 : 3;
+        var step = 0;
 
-        FlowHelper.PrintStep(1, totalSteps, "Worktree");
+        FlowHelper.PrintStep(++step, totalSteps, "Worktree");
         var prompt = new SelectionPrompt<string>()
             .Title("[grey70]Select a worktree feature[/]")
             .HighlightStyle(new Style(Color.White, Color.Grey70));
@@ -366,26 +367,11 @@ public class GroupHandler(
         var feature = available.FirstOrDefault(f => f.Name == selectedName)
                       ?? throw new FlowCancelledException("Feature not found");
 
-        FlowHelper.PrintStep(2, totalSteps, "Color");
+        FlowHelper.PrintStep(++step, totalSteps, "Color");
         var color = flow.PickColor();
 
-        var skipPermissions = false;
-        if (globalSkip)
-        {
-            AnsiConsole.MarkupLine("[grey70]Global skip-permissions is [white]ON[/] — all sessions use it[/]");
-        }
-        else
-        {
-            FlowHelper.PrintStep(3, totalSteps, "Skip Permissions");
-            var skipPerms = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
-                    .HighlightStyle(new Style(Color.White, Color.Grey70))
-                    .AddChoices("No", "Yes"));
-            skipPermissions = skipPerms == "Yes";
-        }
-
-        var effectiveSkip = skipPermissions || globalSkip;
+        var skipPermissions = FlowHelper.PromptSkipPermissions(config, ref step, totalSteps);
+        var effectiveSkip = skipPermissions || config.DangerouslySkipPermissions;
         var sessionNames = new List<string>();
         foreach (var (repoName, repoPath) in feature.Repos)
         {
@@ -427,10 +413,10 @@ public class GroupHandler(
         if (gitFavorites.Count < 2)
             throw new FlowCancelledException("Need at least 2 git repos in favorites");
 
-        var globalSkip = config.DangerouslySkipPermissions;
-        var totalSteps = globalSkip ? 3 : 4;
+        var totalSteps = config.DangerouslySkipPermissions ? 3 : 4;
+        var step = 0;
 
-        FlowHelper.PrintStep(1, totalSteps, "Repositories");
+        FlowHelper.PrintStep(++step, totalSteps, "Repositories");
         var selectedRepos = AnsiConsole.Prompt(
             new MultiSelectionPrompt<string>()
                 .Title("[grey70]Select repos[/]")
@@ -442,7 +428,7 @@ public class GroupHandler(
         if (selectedRepos.Count < 2)
             throw new FlowCancelledException("Groups need at least 2 repos");
 
-        FlowHelper.PrintStep(2, totalSteps, "Feature name");
+        FlowHelper.PrintStep(++step, totalSteps, "Feature name");
         var featureName = FlowHelper.RequireText("[grey70]Feature name[/] [grey](used for branch + folder)[/][grey70]:[/]");
 
         var sanitizedName = FlowHelper.SanitizeSessionName(featureName);
@@ -451,26 +437,11 @@ public class GroupHandler(
         if (config.Groups.ContainsKey(sanitizedName))
             throw new FlowCancelledException($"Group '{sanitizedName}' already exists");
 
-        FlowHelper.PrintStep(3, totalSteps, "Color");
+        FlowHelper.PrintStep(++step, totalSteps, "Color");
         var color = flow.PickColor();
 
-        var skipPermissions = false;
-        if (globalSkip)
-        {
-            AnsiConsole.MarkupLine("[grey70]Global skip-permissions is [white]ON[/] — all sessions use it[/]");
-        }
-        else
-        {
-            FlowHelper.PrintStep(4, totalSteps, "Skip Permissions");
-            var skipPerms = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
-                    .HighlightStyle(new Style(Color.White, Color.Grey70))
-                    .AddChoices("No", "Yes"));
-            skipPermissions = skipPerms == "Yes";
-        }
-
-        var effectiveSkip = skipPermissions || globalSkip;
+        var skipPermissions = FlowHelper.PromptSkipPermissions(config, ref step, totalSteps);
+        var effectiveSkip = skipPermissions || config.DangerouslySkipPermissions;
         var basePath = ConfigService.ExpandPath(config.WorktreeBasePath);
         var featurePath = Path.Combine(basePath, branchName);
 
@@ -551,17 +522,17 @@ public class GroupHandler(
 
     private void CreateManually()
     {
-        var globalSkip = config.DangerouslySkipPermissions;
-        var totalSteps = globalSkip ? 3 : 4;
+        var totalSteps = config.DangerouslySkipPermissions ? 3 : 4;
+        var step = 0;
 
-        FlowHelper.PrintStep(1, totalSteps, "Name");
+        FlowHelper.PrintStep(++step, totalSteps, "Name");
         var name = FlowHelper.RequireText("[grey70]Group name:[/]");
         name = FlowHelper.SanitizeSessionName(name);
 
         if (config.Groups.ContainsKey(name))
             throw new FlowCancelledException($"Group '{name}' already exists");
 
-        FlowHelper.PrintStep(2, totalSteps, "Directories");
+        FlowHelper.PrintStep(++step, totalSteps, "Directories");
         var directories = new List<(string Dir, string Label)>();
 
         for (var i = 0; i < 9; i++)
@@ -605,26 +576,11 @@ public class GroupHandler(
         if (directories.Count < 2)
             throw new FlowCancelledException("Groups need at least 2 sessions");
 
-        FlowHelper.PrintStep(3, totalSteps, "Color");
+        FlowHelper.PrintStep(++step, totalSteps, "Color");
         var color = flow.PickColor();
 
-        var skipPermissions = false;
-        if (globalSkip)
-        {
-            AnsiConsole.MarkupLine("[grey70]Global skip-permissions is [white]ON[/] — all sessions use it[/]");
-        }
-        else
-        {
-            FlowHelper.PrintStep(4, totalSteps, "Skip Permissions");
-            var skipPerms = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
-                    .HighlightStyle(new Style(Color.White, Color.Grey70))
-                    .AddChoices("No", "Yes"));
-            skipPermissions = skipPerms == "Yes";
-        }
-
-        var effectiveSkip = skipPermissions || globalSkip;
+        var skipPermissions = FlowHelper.PromptSkipPermissions(config, ref step, totalSteps);
+        var effectiveSkip = skipPermissions || config.DangerouslySkipPermissions;
         var sessionNames = new List<string>();
         var usedNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (var (dir, label) in directories)
