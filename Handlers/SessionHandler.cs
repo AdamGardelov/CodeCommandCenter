@@ -95,7 +95,7 @@ public class SessionHandler(
             var claudeConfigDir = remoteHost == null
                 ? ConfigService.ResolveClaudeConfigDir(config, dir)
                 : null;
-            var error = backend.CreateSession(name, dir, claudeConfigDir, remoteHost?.Host);
+            var error = backend.CreateSession(name, dir, claudeConfigDir, remoteHost?.Host, config.DangerouslySkipPermissions);
             if (error != null)
                 throw new FlowCancelledException(error);
 

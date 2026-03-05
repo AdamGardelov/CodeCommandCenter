@@ -16,4 +16,5 @@ public class CccConfig
     public string DefaultClaudeConfigDir { get; set; } = "";
     public List<RemoteHost> RemoteHosts { get; set; } = [];
     public Dictionary<string, string> SessionRemoteHosts { get; set; } = new();
+    public bool DangerouslySkipPermissions { get; set; }
 }

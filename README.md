@@ -242,7 +242,7 @@ Press `s` to open the in-app settings page. Navigate categories on the left, set
 | Keybindings   | Enable/disable actions                  |
 | Notifications | Bell, desktop, OSC notify, cooldown     |
 | Favorites     | Add, edit, delete favorite folders      |
-| Advanced      | Open raw config file, reset keybindings |
+| Advanced      | Skip permissions toggle, open raw config file, reset keybindings |
 
 **Controls:** `j/k` navigate, `Tab` switch panels, `Enter` edit/toggle, `Esc` back, `o` open config file.
 
