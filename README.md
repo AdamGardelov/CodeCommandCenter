@@ -251,9 +251,9 @@ Press `s` to open the in-app settings page. Navigate categories on the left, set
 Sessions can launch Claude with `--dangerously-skip-permissions` in two ways:
 
 - **Global toggle** — Settings > Advanced > Skip Permissions. When ON, all new sessions skip permissions automatically.
-- **Per-session** — When creating a session or group, a prompt lets you opt in for that specific session.
+- **Per-session** — When creating a session or group, a prompt lets you opt in for that specific session. When the global toggle is ON, the per-session prompt is skipped automatically.
 
-The global toggle overrides the per-session choice. Both are decided at creation time and apply for the lifetime of the session.
+Both are decided at creation time and apply for the lifetime of the session — changing the global toggle won't affect already-running sessions. Sessions launched with skip-permissions show a `⚡` indicator in the session list, preview panel, and grid view.
 
 ### Worktree Support
 

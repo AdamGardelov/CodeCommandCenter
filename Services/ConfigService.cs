@@ -168,6 +168,14 @@ public static class ConfigService
             Save(config);
     }
 
+    public static void RenameSkipPermissions(CccConfig config, string oldName, string newName)
+    {
+        if (config.SkipPermissionsSessions.Remove(oldName))
+        {
+            config.SkipPermissionsSessions.Add(newName);
+            Save(config);
+        }
+    }
 
     private static bool BackfillKeybindings(CccConfig config)
     {

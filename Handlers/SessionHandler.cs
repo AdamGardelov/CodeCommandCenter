@@ -27,7 +27,8 @@ public class SessionHandler(
         FlowHelper.RunFlow("New Session", () =>
         {
             var hasRemotes = config.RemoteHosts.Count > 0;
-            var totalSteps = hasRemotes ? 6 : 5;
+            var globalSkip = config.DangerouslySkipPermissions;
+            var totalSteps = (hasRemotes ? 1 : 0) + 4 + (globalSkip ? 0 : 1);
             var step = 0;
 
             // Step: Target (only if remote hosts configured)
@@ -92,19 +93,28 @@ public class SessionHandler(
             var color = flow.PickColor();
 
             // Step: Skip permissions
-            FlowHelper.PrintStep(++step, totalSteps, "Skip Permissions");
-            var skipPerms = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
-                    .HighlightStyle(new Style(Color.White, Color.Grey70))
-                    .AddChoices("No", "Yes"));
-            var skipPermissions = skipPerms == "Yes";
+            var skipPermissions = false;
+            if (globalSkip)
+            {
+                AnsiConsole.MarkupLine("[grey70]Global skip-permissions is [white]ON[/] — all sessions use it[/]");
+            }
+            else
+            {
+                FlowHelper.PrintStep(++step, totalSteps, "Skip Permissions");
+                var skipPerms = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[grey70]Launch with [white]--dangerously-skip-permissions[/]?[/]")
+                        .HighlightStyle(new Style(Color.White, Color.Grey70))
+                        .AddChoices("No", "Yes"));
+                skipPermissions = skipPerms == "Yes";
+            }
 
             // Create session
+            var effectiveSkip = skipPermissions || globalSkip;
             var claudeConfigDir = remoteHost == null
                 ? ConfigService.ResolveClaudeConfigDir(config, dir)
                 : null;
-            var error = backend.CreateSession(name, dir, claudeConfigDir, remoteHost?.Host, skipPermissions || config.DangerouslySkipPermissions);
+            var error = backend.CreateSession(name, dir, claudeConfigDir, remoteHost?.Host, effectiveSkip);
             if (error != null)
                 throw new FlowCancelledException(error);
 
@@ -114,7 +124,7 @@ public class SessionHandler(
                 ConfigService.SaveColor(config, name, color);
             if (remoteHost != null)
                 ConfigService.SaveRemoteHost(config, name, remoteHost.Name);
-            if (skipPermissions)
+            if (effectiveSkip)
                 ConfigService.SetSkipPermissions(config, name, true);
             backend.ApplyStatusColor(name, color ?? "grey42");
             backend.AttachSession(name);
@@ -190,6 +200,7 @@ public class SessionHandler(
                 ConfigService.RenameExcluded(config, currentName, newName);
                 ConfigService.RenameStartCommit(config, currentName, newName);
                 ConfigService.RenameRemoteHost(config, currentName, newName);
+                ConfigService.RenameSkipPermissions(config, currentName, newName);
                 currentName = newName;
                 changed = true;
             }
