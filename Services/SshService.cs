@@ -68,7 +68,9 @@ public static class SshService
             return (shell, ["-lc", claudeCmd]);
         }
 
-        return ("ssh", ["-t", remoteHost, $"cd {EscapePath(workingDirectory)} && {claudeCmd}"]);
+        // Wrap in exec $SHELL -lc so the remote gets a login shell (loads PATH etc.)
+        // This mirrors the local behavior where we use "$SHELL -lc claude".
+        return ("ssh", ["-t", remoteHost, $"cd {EscapePath(workingDirectory)} && exec \"$SHELL\" -lc {EscapeSegment(claudeCmd)}"]);
     }
 
     /// <summary>
