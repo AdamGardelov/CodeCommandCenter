@@ -68,7 +68,7 @@ public static class Renderer
         if (state.LatestVersion != null)
             versionText += $" [yellow bold]v{state.LatestVersion} available · u to update[/]";
 
-        var left = new Markup($"[mediumpurple3 bold] Claude Command Center[/] {versionText}");
+        var left = new Markup($"[mediumpurple3 bold] Code Command Center[/] {versionText}");
 
         var groupInfo = state.ActiveGroup != null
             ? $" [grey]│[/] [mediumpurple3]{Markup.Escape(state.ActiveGroup)}[/]"
@@ -218,7 +218,7 @@ public static class Renderer
             return new Panel(
                     new Rows(
                         new Text(""),
-                        CenterFiglet("Claude", panelWidth, Color.MediumPurple3),
+                        CenterFiglet("Code", panelWidth, Color.MediumPurple3),
                         CenterFiglet("Command center", panelWidth, Color.MediumPurple3),
                         new Text(""),
                         Align.Center(new Markup("[grey50]Select a session to see preview[/]"))))
@@ -1050,7 +1050,7 @@ public static class Renderer
 
     private static Columns BuildSettingsHeader()
     {
-        var left = new Markup("[mediumpurple3 bold] Claude Command Center[/] [grey50]Settings[/]");
+        var left = new Markup("[mediumpurple3 bold] Code Command Center[/] [grey50]Settings[/]");
         var right = new Markup("[grey50]Esc to return [/]");
         return new Columns(left, right)
         {
