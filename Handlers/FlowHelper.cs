@@ -37,7 +37,7 @@ public class FlowHelper(CccConfig config)
         Console.CursorVisible = true;
         _flowTitle = title;
         Console.Clear();
-        AnsiConsole.MarkupLine($"[mediumpurple3 bold] Claude Command Center[/]  [grey]\u203a[/]  [white bold]{Markup.Escape(title)}[/]\n");
+        AnsiConsole.MarkupLine($"[mediumpurple3 bold] Code Command Center[/]  [grey]\u203a[/]  [white bold]{Markup.Escape(title)}[/]\n");
         try
         {
             body();
@@ -57,7 +57,7 @@ public class FlowHelper(CccConfig config)
     {
         Console.Clear();
         var title = _flowTitle ?? "";
-        AnsiConsole.MarkupLine($"[mediumpurple3 bold] Claude Command Center[/]  [grey]\u203a[/]  [white bold]{Markup.Escape(title)}[/]\n");
+        AnsiConsole.MarkupLine($"[mediumpurple3 bold] Code Command Center[/]  [grey]\u203a[/]  [white bold]{Markup.Escape(title)}[/]\n");
         var dots = new string[total];
         for (var i = 0; i < total; i++)
             dots[i] = i < current ? "[mediumpurple3]\u25cf[/]" : "[grey42]\u25cb[/]";
