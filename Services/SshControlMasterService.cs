@@ -8,7 +8,7 @@ public static class SshControlMasterService
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ccc", "ssh");
 
     // Tracks last failed connection attempt per host to throttle retries (30s cooldown)
-    private static readonly Dictionary<string, DateTime> _lastFailure = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _lastFailure = new();
     private static readonly TimeSpan _retryCooldown = TimeSpan.FromSeconds(30);
 
     /// <summary>
@@ -151,7 +151,12 @@ public static class SshControlMasterService
             Directory.CreateDirectory(_socketDir);
             // Restrict socket dir to owner only
             if (!OperatingSystem.IsWindows())
-                Process.Start("chmod", $"700 {_socketDir}")?.WaitForExit(1000);
+            {
+                var chmodInfo = new ProcessStartInfo { FileName = "chmod", UseShellExecute = false };
+                chmodInfo.ArgumentList.Add("700");
+                chmodInfo.ArgumentList.Add(_socketDir);
+                Process.Start(chmodInfo)?.WaitForExit(1000);
+            }
 
             var socketPath = SocketPath(host);
             var startInfo = new ProcessStartInfo
@@ -189,7 +194,7 @@ public static class SshControlMasterService
             if (!connected)
                 _lastFailure[host] = DateTime.UtcNow;
             else
-                _lastFailure.Remove(host);
+                _lastFailure.TryRemove(host, out _);
 
             return connected;
         }
