@@ -132,7 +132,7 @@ public static class Renderer
         var spinner = Markup.Escape(GetSpinnerFrame());
         var skipIcon = session.SkipPermissions ? "[yellow]⚡[/]" : " ";
         var remoteIcon = session.RemoteHostName != null ? "[mediumpurple3]☁[/]" : " ";
-        var flags = $"{skipIcon}{remoteIcon}";
+        var flags = $"{remoteIcon}{skipIcon}";
         var nameWidth = indented ? 19 : 22;
         var name = rawName.PadRight(nameWidth);
 
@@ -493,8 +493,9 @@ public static class Renderer
 
         var name = Markup.Escape(nameStr);
         var branch = branchStr != null ? $" [aqua]{Markup.Escape(branchStr)}[/]" : "";
+        var remoteIcon = session.RemoteHostName != null ? " [mediumpurple3]☁[/]" : "";
         var skipIcon = session.SkipPermissions ? " [yellow]⚡[/]" : "";
-        rows.Add(new Markup($" {status} [white bold]{name}[/]{branch}{skipIcon}"));
+        rows.Add(new Markup($" {status} [white bold]{name}[/]{branch}{remoteIcon}{skipIcon}"));
 
         if (session.CurrentPath != null)
         {
