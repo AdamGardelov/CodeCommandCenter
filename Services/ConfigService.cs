@@ -202,6 +202,19 @@ public static class ConfigService
         return changed;
     }
 
+    public static void SaveRemoteSessionCache(CccConfig config, string hostName, List<Session> sessions)
+    {
+        config.CachedRemoteSessions[hostName] = sessions
+            .Select(s => new CachedRemoteSession
+            {
+                Name = s.Name,
+                Path = s.CurrentPath,
+                Created = s.Created ?? DateTime.UtcNow,
+            })
+            .ToList();
+        Save(config);
+    }
+
     public static void SaveConfig(CccConfig config) => Save(config);
 
     private static void Save(CccConfig config)
