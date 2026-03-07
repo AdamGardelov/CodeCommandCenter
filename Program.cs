@@ -23,7 +23,7 @@ try
 
     // Kick off ControlMaster connections in background (non-blocking startup)
     foreach (var host in config.RemoteHosts)
-        Task.Run(() => SshControlMasterService.EnsureConnected(host.Host));
+        _ = Task.Run(() => SshControlMasterService.EnsureConnected(host.Host));
 
     // Router is the single ISessionBackend used by App
     var routedBackend = new BackendRouter(localBackend, remotes, config);
