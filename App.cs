@@ -239,7 +239,8 @@ public class App(ISessionBackend backend, bool mobileMode = false)
             if (_config.SessionRemoteHosts.TryGetValue(s.Name, out var remoteHostName))
                 s.RemoteHostName = remoteHostName;
             s.SkipPermissions = _config.SkipPermissionsSessions.Contains(s.Name);
-            backend.ApplyStatusColor(s.Name, color ?? "grey42");
+            if (!s.IsOffline)
+                backend.ApplyStatusColor(s.Name, color ?? "grey42");
 
             // Preserve content tracking state so sessions don't briefly flash as "working"
             if (oldSessions.TryGetValue(s.Name, out var old))
@@ -269,7 +270,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
         }
 
         // Re-detect git info for remote sessions (backend only does local detection)
-        foreach (var s in _state.Sessions.Where(s => s.RemoteHostName != null))
+        foreach (var s in _state.Sessions.Where(s => s.RemoteHostName != null && !s.IsOffline))
         {
             var host = _config.RemoteHosts.FirstOrDefault(h => h.Name == s.RemoteHostName);
             if (host != null)

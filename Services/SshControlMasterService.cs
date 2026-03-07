@@ -9,6 +9,7 @@ public static class SshControlMasterService
 
     // Tracks last failed connection attempt per host to throttle retries (30s cooldown)
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _lastFailure = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
     private static readonly TimeSpan _retryCooldown = TimeSpan.FromSeconds(30);
 
     /// <summary>
@@ -150,8 +151,16 @@ public static class SshControlMasterService
 
     private static bool StartControlMaster(string host)
     {
+        var sem = _locks.GetOrAdd(host, _ => new SemaphoreSlim(1, 1));
+        if (!sem.Wait(0)) // If another caller is already starting, don't block — just report not connected yet
+            return false;
+
         try
         {
+            // Re-check after acquiring — another caller may have connected while we waited
+            if (IsAlive(host))
+                return true;
+
             Directory.CreateDirectory(_socketDir);
             // Restrict socket dir to owner only
             if (!OperatingSystem.IsWindows())
@@ -206,6 +215,10 @@ public static class SshControlMasterService
         {
             _lastFailure[host] = DateTime.UtcNow;
             return false;
+        }
+        finally
+        {
+            sem.Release();
         }
     }
 

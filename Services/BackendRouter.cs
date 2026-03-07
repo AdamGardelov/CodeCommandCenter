@@ -48,7 +48,9 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
         }
 
         // Rebuild routing map
-        _sessionHosts = all.ToDictionary(s => s.Name, s => s.RemoteHostName);
+        _sessionHosts = new Dictionary<string, string?>();
+        foreach (var s in all)
+            _sessionHosts[s.Name] = s.RemoteHostName;
 
         return all;
     }
