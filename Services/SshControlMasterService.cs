@@ -25,7 +25,10 @@ public static class SshControlMasterService
             return false;
 
         if (IsAlive(host))
+        {
+            _lastFailure.TryRemove(host, out _);
             return true;
+        }
 
         // If this host has failed before, reconnect in background to avoid
         // blocking the main loop. The next poll will pick it up once connected.
@@ -99,9 +102,13 @@ public static class SshControlMasterService
             var stdout = stdoutTask.Result;
             var stderr = stderrTask.Result;
 
-            return process.ExitCode == 0
-                ? (true, stdout.TrimEnd(), null)
-                : (false, null, stderr.Trim());
+            if (process.ExitCode == 0)
+            {
+                // Clear failure state so future EnsureConnected calls don't go async
+                _lastFailure.TryRemove(host, out _);
+                return (true, stdout.TrimEnd(), null);
+            }
+            return (false, null, stderr.Trim());
         }
         catch
         {
