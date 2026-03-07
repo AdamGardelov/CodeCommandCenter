@@ -20,4 +20,5 @@ public class Session
     public string? StartCommitSha { get; set; }
     public string? RemoteHostName { get; set; }
     public bool SkipPermissions { get; set; }
+    public bool IsOffline { get; set; }
 }
