@@ -633,6 +633,17 @@ public static class Renderer
         var name = Markup.Escape(session.Name);
         var spinner = Markup.Escape(GetSpinnerFrame());
 
+        if (session.IsOffline)
+        {
+            var hostInfo = session.RemoteHostName != null
+                ? $" [grey35]({Markup.Escape(session.RemoteHostName)})[/]"
+                : "";
+            var row = $"[grey35]✗ {name}[/]{hostInfo}";
+            return isSelected
+                ? new Markup($"[on grey15]{row}[/]")
+                : new Markup(row);
+        }
+
         if (session.IsDead)
         {
             if (session.IsExcluded)
