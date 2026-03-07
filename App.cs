@@ -37,6 +37,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
     private bool _gridKeyForwarded;
     private readonly List<ConsoleKeyInfo> _gridKeyBatch = [];
     private DateTime _lastGridActivity = DateTime.MinValue;
+    private DateTime _lastSessionLoad = DateTime.MinValue;
 
     public void Run()
     {
@@ -88,6 +89,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
         _state.Keybindings = bindings;
 
         LoadSessions();
+        _lastSessionLoad = DateTime.UtcNow;
         _updateCheck = UpdateChecker.CheckForUpdateAsync();
 
         try
@@ -186,6 +188,15 @@ public class App(ISessionBackend backend, bool mobileMode = false)
                 }
             }
 
+            // Periodically reload session list when remote hosts are configured
+            // so offline/reconnected state is detected without manual refresh
+            if (_config.RemoteHosts.Count > 0 && (DateTime.UtcNow - _lastSessionLoad).TotalSeconds > 15)
+            {
+                _lastSessionLoad = DateTime.UtcNow;
+                LoadSessions();
+                Render();
+            }
+
             // Periodically capture pane content for preview/grid.
             // Use a tighter interval (80ms) during active grid typing so visual
             // feedback arrives quickly without blocking the input path.
@@ -239,7 +250,8 @@ public class App(ISessionBackend backend, bool mobileMode = false)
             if (_config.SessionRemoteHosts.TryGetValue(s.Name, out var remoteHostName))
                 s.RemoteHostName = remoteHostName;
             s.SkipPermissions = _config.SkipPermissionsSessions.Contains(s.Name);
-            backend.ApplyStatusColor(s.Name, color ?? "grey42");
+            if (!s.IsOffline)
+                backend.ApplyStatusColor(s.Name, color ?? "grey42");
 
             // Preserve content tracking state so sessions don't briefly flash as "working"
             if (oldSessions.TryGetValue(s.Name, out var old))
@@ -269,7 +281,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
         }
 
         // Re-detect git info for remote sessions (backend only does local detection)
-        foreach (var s in _state.Sessions.Where(s => s.RemoteHostName != null))
+        foreach (var s in _state.Sessions.Where(s => s.RemoteHostName != null && !s.IsOffline))
         {
             var host = _config.RemoteHosts.FirstOrDefault(h => h.Name == s.RemoteHostName);
             if (host != null)
