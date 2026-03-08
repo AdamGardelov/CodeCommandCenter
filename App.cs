@@ -299,6 +299,14 @@ public class App(ISessionBackend backend, bool mobileMode = false)
             configDirty = true;
         }
 
+        // Prune orphaned config entries for sessions that no longer exist
+        var liveNames = new HashSet<string>(_state.Sessions.Select(s => s.Name));
+        configDirty |= PruneDict(_config.SessionDescriptions, liveNames);
+        configDirty |= PruneDict(_config.SessionColors, liveNames);
+        configDirty |= PruneDict(_config.SessionStartCommits, liveNames);
+        configDirty |= PruneSet(_config.ExcludedSessions, liveNames);
+        configDirty |= PruneSet(_config.SkipPermissionsSessions, liveNames);
+
         if (configDirty)
             ConfigService.SaveConfig(_config);
 
@@ -1060,5 +1068,20 @@ public class App(ISessionBackend backend, bool mobileMode = false)
             });
             process?.WaitForExit();
         }
+    }
+
+    private static bool PruneDict(Dictionary<string, string> dict, HashSet<string> liveNames)
+    {
+        var stale = dict.Keys.Where(k => !liveNames.Contains(k)).ToList();
+        foreach (var key in stale)
+            dict.Remove(key);
+        return stale.Count > 0;
+    }
+
+    private static bool PruneSet(HashSet<string> set, HashSet<string> liveNames)
+    {
+        var before = set.Count;
+        set.RemoveWhere(s => !liveNames.Contains(s));
+        return set.Count != before;
     }
 }
