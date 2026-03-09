@@ -28,7 +28,7 @@ try
     // Router is the single ISessionBackend used by App
     var routedBackend = new BackendRouter(localBackend, remotes, config);
 
-    var app = new App(routedBackend, mobile);
+    var app = new App(routedBackend, config, mobile);
     app.Run();
 }
 catch (Exception ex)

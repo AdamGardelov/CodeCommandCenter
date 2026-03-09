@@ -8,14 +8,14 @@ using Spectre.Console;
 
 namespace ClaudeCommandCenter;
 
-public class App(ISessionBackend backend, bool mobileMode = false)
+public class App(ISessionBackend backend, CccConfig config, bool mobileMode = false)
 {
     private readonly AppState _state = new()
     {
         MobileMode = mobileMode
     };
 
-    private readonly CccConfig _config = ConfigService.Load();
+    private readonly CccConfig _config = config;
     private FlowHelper _flow = null!;
     private DiffHandler _diffHandler = null!;
     private SettingsHandler _settingsHandler = null!;
@@ -288,16 +288,7 @@ public class App(ISessionBackend backend, bool mobileMode = false)
                 GitService.DetectGitInfo(s, host.Host);
         }
 
-        // Sync SessionRemoteHosts from backend truth (for offline fallback)
         var configDirty = startCommitsDirty;
-        var liveRemoteHosts = _state.Sessions
-            .Where(s => s.RemoteHostName != null)
-            .ToDictionary(s => s.Name, s => s.RemoteHostName!);
-        if (!liveRemoteHosts.OrderBy(kv => kv.Key).SequenceEqual(_config.SessionRemoteHosts.OrderBy(kv => kv.Key)))
-        {
-            _config.SessionRemoteHosts = liveRemoteHosts;
-            configDirty = true;
-        }
 
         // Prune orphaned config entries for sessions that no longer exist
         var liveNames = new HashSet<string>(_state.Sessions.Select(s => s.Name));
