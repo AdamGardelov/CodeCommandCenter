@@ -137,6 +137,14 @@ public static class KeyBindingService
             CanDisable = false,
             StatusBarOrder = 33
         },
+        new()
+        {
+            ActionId = "toggle-expand",
+            Key = "Space",
+            Label = null,
+            CanDisable = false,
+            StatusBarOrder = -1
+        },
         // Group 4: View (mode + exit)
         new()
         {

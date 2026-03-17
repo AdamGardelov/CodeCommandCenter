@@ -23,7 +23,7 @@ A terminal UI for managing multiple Claude Code sessions. Run dozens of Claude a
 - **Live preview** — see each session's terminal output in real-time without attaching
 - **Grid view** — monitor up to 9 sessions simultaneously in an auto-scaling grid
 - **Waiting-for-input detection** — sessions that need your attention are marked with `!` and trigger notifications
-- **Session groups** — organize related sessions together, create them in bulk from git worktrees
+- **Session groups** — organize related sessions together, create them in bulk from git worktrees, open a single session for the entire worktree
 - **Git worktree integration** — create worktrees on the fly, one branch per session, shared feature folders with auto-discovery
 - **Git diff view** — see what changed since a session started, with full colorized scrollable diff overlay
 - **Notifications** — terminal bell, OSC, and desktop notifications when sessions go idle
@@ -178,7 +178,8 @@ between cells. Press `Escape` to return to list view.
 | Key                | Action                                                           |
 |--------------------|------------------------------------------------------------------|
 | `j` / `k` / arrows | Navigate sessions                                                |
-| `Enter`            | Attach to session / expand or collapse group                     |
+| `Enter`            | Attach to session / open worktree group session                  |
+| `Space`            | Toggle expand/collapse group                                     |
 | `Ctrl+G`           | Toggle grid view (group grid when on a grouped session)          |
 | `D`                | Toggle git diff mode (summary in preview, `Enter` for full diff) |
 | `n`                | Create new session (launches `claude` in a given directory)      |
@@ -451,6 +452,7 @@ Each override supports three optional fields:
 | `toggle-exclude` | `x`         | hide          | Yes         |
 | `move-to-group`  | `m`         | move          | Yes         |
 | `adopt-remote`   | `a`         | adopt         | Yes         |
+| `toggle-expand`  | `Space`     | (hidden)      | No          |
 | `toggle-grid`    | `Ctrl+G`    | grid          | Yes         |
 | `toggle-diff`    | `D`         | diff          | Yes         |
 | `refresh`        | `r`         | (hidden)      | Yes         |

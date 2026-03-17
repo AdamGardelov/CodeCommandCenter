@@ -120,7 +120,7 @@ public class AppState
         foreach (var session in GetStandaloneSessions())
             items.Add(new TreeItem.SessionItem(session, null));
 
-        // Then groups with their sessions
+        // Then groups with their sessions and repos
         foreach (var group in Groups)
         {
             var isExpanded = ExpandedGroups.Contains(group.Name);
@@ -132,8 +132,22 @@ public class AppState
                 var groupSessions = Sessions
                     .Where(s => groupSessionNames.Contains(s.Name))
                     .ToList();
+
+                // Show live sessions
                 foreach (var session in groupSessions)
                     items.Add(new TreeItem.SessionItem(session, group.Name));
+
+                // Show repos that don't have a live session yet
+                if (group.Repos.Count > 0)
+                {
+                    var liveSessionNames = new HashSet<string>(groupSessions.Select(s => s.Name));
+                    foreach (var (repoName, repoPath) in group.Repos)
+                    {
+                        var expectedSessionName = $"{group.Name}-{repoName}";
+                        if (!liveSessionNames.Contains(expectedSessionName))
+                            items.Add(new TreeItem.RepoItem(repoName, repoPath, group.Name));
+                    }
+                }
             }
         }
 

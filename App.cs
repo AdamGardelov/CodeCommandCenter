@@ -319,7 +319,8 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
             var removed = group.Sessions.RemoveAll(s => !liveSessionNames.Contains(s));
             if (removed > 0)
                 configChanged = true;
-            if (group.Sessions.Count == 0)
+            // Only remove groups with no sessions AND no repos (worktree groups survive with zero sessions)
+            if (group.Sessions.Count == 0 && group.Repos.Count == 0)
                 emptyGroups.Add(name);
         }
 
@@ -337,6 +338,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
                 Color = g.Color,
                 WorktreePath = g.WorktreePath,
                 Sessions = g.Sessions.ToList(),
+                Repos = new Dictionary<string, string>(g.Repos),
             })
             .OrderBy(g => g.Name)
             .ToList();
@@ -583,12 +585,59 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
         if (_state.ViewMode == ViewMode.List && _state.ActiveGroup == null)
         {
             var currentItem = _state.GetTreeItems().ElementAtOrDefault(_state.CursorIndex);
+            if (currentItem is TreeItem.RepoItem ri)
+            {
+                if (actionId == "attach")
+                {
+                    var sessionName = _groupHandler.CreateRepoSession(
+                        ri.GroupName, ri.RepoName, ri.RepoPath, _claudeAvailable);
+                    if (sessionName != null)
+                    {
+                        var treeItems = _state.GetTreeItems();
+                        var idx = treeItems.FindIndex(t =>
+                            t is TreeItem.SessionItem si && si.Session.Name == sessionName);
+                        if (idx >= 0)
+                            _state.CursorIndex = idx;
+                        _sessionHandler.Attach();
+                    }
+                }
+                return;
+            }
+
             if (currentItem is TreeItem.GroupHeader gh)
             {
                 switch (actionId)
                 {
                     case "attach":
-                        // Enter on group header = toggle expand/collapse
+                        // Enter on worktree group = open/attach root session
+                        if (!string.IsNullOrEmpty(gh.Group.WorktreePath))
+                        {
+                            var rootSession = _groupHandler.OpenWorktreeSession(_claudeAvailable);
+                            if (rootSession != null)
+                            {
+                                // Find and select the root session, then attach
+                                var session = _state.Sessions.FirstOrDefault(s => s.Name == rootSession);
+                                if (session != null)
+                                {
+                                    // Expand the group so the session is visible
+                                    _state.ExpandedGroups.Add(gh.Group.Name);
+                                    var treeItems = _state.GetTreeItems();
+                                    var idx = treeItems.FindIndex(t =>
+                                        t is TreeItem.SessionItem si && si.Session.Name == rootSession);
+                                    if (idx >= 0)
+                                        _state.CursorIndex = idx;
+                                    _sessionHandler.Attach();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Non-worktree group: toggle expand/collapse
+                            _state.ToggleGroupExpanded(gh.Group.Name);
+                            _state.ClampCursor();
+                        }
+                        return;
+                    case "toggle-expand":
                         _state.ToggleGroupExpanded(gh.Group.Name);
                         _state.ClampCursor();
                         return;
@@ -674,6 +723,9 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
                     _state.Running = false;
                 }
 
+                break;
+            case "toggle-expand":
+                // Only meaningful on group headers (handled above)
                 break;
             case "refresh":
                 LoadSessions();

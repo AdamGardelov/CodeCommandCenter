@@ -105,6 +105,9 @@ public static class Renderer
                     case TreeItem.GroupHeader gh:
                         rows.Add(BuildTreeGroupRow(gh, isSelected, state));
                         break;
+                    case TreeItem.RepoItem ri:
+                        rows.Add(BuildRepoRow(ri, isSelected));
+                        break;
                 }
             }
         }
@@ -116,6 +119,13 @@ public static class Renderer
             borderColor = Style.Parse(selSession.Session.ColorTag).Foreground;
         else if (selectedItem is TreeItem.GroupHeader { Group.Color: not null and not "" } selGroup)
             borderColor = Style.Parse(selGroup.Group.Color).Foreground;
+        else if (selectedItem is TreeItem.RepoItem ri)
+        {
+            var riGroup = state.Groups.FirstOrDefault(g => g.Name == ri.GroupName);
+            borderColor = riGroup is { Color: not null and not "" }
+                ? Style.Parse(riGroup.Color).Foreground
+                : Color.Grey42;
+        }
         else
             borderColor = Color.Grey42;
 
@@ -143,7 +153,7 @@ public static class Renderer
             var hostInfo = session.RemoteHostName != null
                 ? $" [grey35]({Markup.Escape(session.RemoteHostName)})[/]"
                 : "";
-            var row = $"[grey35]{prefix}✗ {escapedName}[/]{hostInfo}";
+            var row = $"[grey35]{prefix}✗ {escapedName}[/]{hostInfo}{skipIcon}";
             return isSelected
                 ? new Markup($"[on grey15]{row}[/]")
                 : new Markup(row);
@@ -191,13 +201,24 @@ public static class Renderer
         return new Markup($"{indent} [green]{spinner}[/] [navajowhite1]{name}[/]{flags}");
     }
 
+    private static Markup BuildRepoRow(TreeItem.RepoItem repo, bool isSelected)
+    {
+        var name = Markup.Escape(repo.RepoName).PadRight(19);
+        if (isSelected)
+            return new Markup($"[grey70 on grey19]    ○ {name}[/]");
+        return new Markup($"    [grey42]○[/] [grey50]{name}[/]");
+    }
+
     private static Markup BuildTreeGroupRow(TreeItem.GroupHeader header, bool isSelected, AppState state)
     {
         var group = header.Group;
         var name = Markup.Escape(group.Name);
-        var totalSessions = group.Sessions.Count;
+        var liveCount = group.Sessions.Count;
+        // Count repos that don't have a live session yet
+        var pendingRepos = group.Repos.Count(r => !group.Sessions.Contains($"{group.Name}-{r.Key}"));
+        var totalCount = liveCount + pendingRepos;
         var expandIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
-        var countLabel = $"({totalSessions})";
+        var countLabel = liveCount < totalCount ? $"({liveCount}/{totalCount})" : $"({totalCount})";
         var colorTag = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey50";
 
         if (isSelected)
@@ -206,7 +227,7 @@ public static class Renderer
             return new Markup($"[white on {bg}] {expandIcon} {name,-14} {countLabel,-4} [/]");
         }
 
-        if (totalSessions == 0)
+        if (totalCount == 0)
             return new Markup($" [grey50]{expandIcon}[/] [grey50 strikethrough]{name,-14}[/] [grey42]{countLabel}[/]");
 
         return new Markup($" [{colorTag}]{expandIcon}[/] [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]");
@@ -219,11 +240,13 @@ public static class Renderer
 
         if (session == null)
         {
-            // Check if cursor is on a group header
+            // Check if cursor is on a group header or repo item
             var treeItems = state.GetTreeItems();
             var currentItem = treeItems.ElementAtOrDefault(state.CursorIndex);
             if (currentItem is TreeItem.GroupHeader gh)
                 return BuildGroupPreviewPanel(gh.Group, state);
+            if (currentItem is TreeItem.RepoItem ri)
+                return BuildRepoPreviewPanel(ri, state);
 
             // Panel width = terminal - session panel (35) - panel borders (4)
             var panelWidth = Math.Max(20, Console.WindowWidth - 35 - 4);
@@ -377,11 +400,25 @@ public static class Renderer
             rows.Add(new Markup($"  {status} [white]{name}[/]{branch}{remote}{skip}{path}"));
         }
 
-        if (groupSessions.Count == 0)
+        // Show repos that don't have a live session yet
+        if (group.Repos.Count > 0)
+        {
+            var liveNames = new HashSet<string>(groupSessions.Select(s => s.Name));
+            foreach (var (repoName, _) in group.Repos)
+            {
+                if (!liveNames.Contains($"{group.Name}-{repoName}"))
+                    rows.Add(new Markup($"  [grey42]○[/] [grey50]{Markup.Escape(repoName)}[/]"));
+            }
+        }
+
+        if (groupSessions.Count == 0 && group.Repos.Count == 0)
             rows.Add(new Markup("  [grey50]All sessions have ended[/]"));
 
         rows.Add(new Text(""));
-        rows.Add(new Markup("  [grey]Press [/][grey70 bold]Enter[/][grey] to expand/collapse · [/][grey70 bold]Ctrl+G[/][grey] grid · [/][grey70 bold]e[/][grey] to edit[/]"));
+        var hint = !string.IsNullOrEmpty(group.WorktreePath)
+            ? "  [grey]Press [/][grey70 bold]Enter[/][grey] to open · [/][grey70 bold]Space[/][grey] expand/collapse · [/][grey70 bold]Ctrl+G[/][grey] grid · [/][grey70 bold]e[/][grey] to edit[/]"
+            : "  [grey]Press [/][grey70 bold]Space[/][grey] expand/collapse · [/][grey70 bold]Ctrl+G[/][grey] grid · [/][grey70 bold]e[/][grey] to edit[/]";
+        rows.Add(new Markup(hint));
 
         var borderColor = !string.IsNullOrEmpty(group.Color)
             ? Style.Parse(group.Color).Foreground
@@ -389,6 +426,29 @@ public static class Renderer
 
         return new Panel(new Rows(rows))
             .Header($"[{colorTag} bold] {Markup.Escape(group.Name)} [/]")
+            .BorderColor(borderColor)
+            .Expand();
+    }
+
+    private static Panel BuildRepoPreviewPanel(TreeItem.RepoItem repo, AppState state)
+    {
+        var group = state.Groups.FirstOrDefault(g => g.Name == repo.GroupName);
+        var colorTag = group is { Color: not null and not "" } ? group.Color : "grey50";
+        var rows = new List<IRenderable>
+        {
+            new Markup($" [{colorTag}]Repo:[/]   [white bold]{Markup.Escape(repo.RepoName)}[/]"),
+            new Markup($" [{colorTag}]Path:[/]   [white]{Markup.Escape(repo.RepoPath)}[/]"),
+            new Markup($" [{colorTag}]Status:[/] [grey50]No session yet[/]"),
+            new Text(""),
+            new Markup("  [grey]Press [/][grey70 bold]Enter[/][grey] to create session and attach[/]"),
+        };
+
+        var borderColor = group is { Color: not null and not "" }
+            ? Style.Parse(group.Color).Foreground
+            : Color.Grey42;
+
+        return new Panel(new Rows(rows))
+            .Header($"[{colorTag} bold] {Markup.Escape(repo.RepoName)} [/]")
             .BorderColor(borderColor)
             .Expand();
     }
@@ -802,7 +862,8 @@ public static class Renderer
 
         // Check if cursor is on a group header — dim session-only actions
         var treeItems = state.GetTreeItems();
-        var onGroupHeader = treeItems.ElementAtOrDefault(state.CursorIndex) is TreeItem.GroupHeader;
+        var currentItem = treeItems.ElementAtOrDefault(state.CursorIndex);
+        var onGroupHeader = currentItem is TreeItem.GroupHeader or TreeItem.RepoItem;
         var sessionOnlyActions = new HashSet<string> { "approve", "reject", "send-text" };
 
         var parts = new List<string>();

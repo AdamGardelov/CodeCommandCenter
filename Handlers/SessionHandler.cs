@@ -323,7 +323,10 @@ public class SessionHandler(
 
         FlowHelper.RunFlow("Adopt Remote Session", () =>
         {
-            FlowHelper.PrintStep(1, 3, "Session");
+            var totalSteps = config.DangerouslySkipPermissions ? 3 : 4;
+            var step = 0;
+
+            FlowHelper.PrintStep(++step, totalSteps, "Session");
             var prompt = new SelectionPrompt<string>()
                 .Title("[grey70]Select a remote session to adopt[/]")
                 .HighlightStyle(new Style(Color.White, Color.Grey70));
@@ -347,12 +350,15 @@ public class SessionHandler(
                           ?? throw new FlowCancelledException("Session not found");
 
             // Step: Description
-            FlowHelper.PrintStep(2, 3, "Description");
+            FlowHelper.PrintStep(++step, totalSteps, "Description");
             var description = flow.PromptOptional("Description", null);
 
             // Step: Color
-            FlowHelper.PrintStep(3, 3, "Color");
+            FlowHelper.PrintStep(++step, totalSteps, "Color");
             var color = flow.PickColor();
+
+            // Step: Skip permissions
+            var skipPermissions = FlowHelper.PromptSkipPermissions(config, ref step, totalSteps);
 
             // Track the session
             ConfigService.SaveRemoteHost(config, session.Name, session.RemoteHostName!);
@@ -363,6 +369,8 @@ public class SessionHandler(
                 ConfigService.SaveColor(config, session.Name, color);
                 backend.ApplyStatusColor(session.Name, color);
             }
+            if (skipPermissions || config.DangerouslySkipPermissions)
+                ConfigService.SetSkipPermissions(config, session.Name, true);
 
             loadSessions();
             state.SetStatus($"Adopted '{session.Name}' from {session.RemoteHostName}");

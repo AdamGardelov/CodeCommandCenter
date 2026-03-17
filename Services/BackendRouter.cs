@@ -49,6 +49,7 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
             else
             {
                 // Split into tracked (show in dashboard) and untracked (available for adoption)
+                var remoteNames = new HashSet<string>(remoteSessions.Select(s => s.Name));
                 foreach (var s in remoteSessions)
                 {
                     if (tracked.TryGetValue(s.Name, out var trackedHost) && trackedHost == hostName)
@@ -56,6 +57,14 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
                     else
                         untracked.Add(s);
                 }
+
+                // Prune tracked sessions that no longer exist on the remote
+                var staleTracked = tracked
+                    .Where(kv => kv.Value == hostName && !remoteNames.Contains(kv.Key))
+                    .Select(kv => kv.Key)
+                    .ToList();
+                foreach (var name in staleTracked)
+                    ConfigService.RemoveRemoteHost(config, name);
 
                 // Cache only tracked sessions
                 var trackedForHost = remoteSessions

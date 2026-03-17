@@ -297,20 +297,23 @@ public class SettingsHandler(
 
     private void DeleteFavorite()
     {
-        if (state.SettingsItemCursor >= config.FavoriteFolders.Count)
+        // Each favorite produces 2 items (name + default branch), so map cursor to favorite index
+        var favoriteIndex = state.SettingsItemCursor / 2;
+        if (favoriteIndex >= config.FavoriteFolders.Count)
             return;
 
-        var fav = config.FavoriteFolders[state.SettingsItemCursor];
+        var fav = config.FavoriteFolders[favoriteIndex];
         state.SetStatus($"Delete '{fav.Name}'? (y/n)");
         render();
 
         var confirm = Console.ReadKey(true);
         if (confirm.Key == ConsoleKey.Y)
         {
-            config.FavoriteFolders.RemoveAt(state.SettingsItemCursor);
+            config.FavoriteFolders.RemoveAt(favoriteIndex);
             ConfigService.SaveConfig(config);
-            state.SettingsItemCursor = Math.Min(state.SettingsItemCursor,
-                Math.Max(0, config.FavoriteFolders.Count - 1));
+            // Reset cursor to the start of the previous favorite, or 0
+            state.SettingsItemCursor = Math.Min(favoriteIndex * 2,
+                Math.Max(0, config.FavoriteFolders.Count * 2 - 1));
             state.SetStatus("Deleted");
         }
         else

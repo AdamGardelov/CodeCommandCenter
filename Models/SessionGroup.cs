@@ -7,4 +7,5 @@ public class SessionGroup
     public string Color { get; set; } = "";
     public string WorktreePath { get; set; } = "";
     public List<string> Sessions { get; set; } = [];
+    public Dictionary<string, string> Repos { get; set; } = new();
 }
