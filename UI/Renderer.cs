@@ -217,7 +217,7 @@ public static class Renderer
         var liveCount = group.Sessions.Count(s => s != group.Name);
         var hasRootSession = group.Sessions.Contains(group.Name);
         var expandIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
-        var countLabel = $"({liveCount})";
+        var countLabel = liveCount > 0 ? $"({liveCount})" : "";
         var colorTag = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey50";
 
         // Show root session status indicator on the group header

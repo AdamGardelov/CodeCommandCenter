@@ -67,6 +67,13 @@ public class AppState
         {
             if (treeItems[CursorIndex] is TreeItem.SessionItem si)
                 return si.Session;
+
+            // Group header with a root session — return it for preview/actions
+            if (treeItems[CursorIndex] is TreeItem.GroupHeader gh
+                && gh.Group.Sessions.Contains(gh.Group.Name))
+            {
+                return Sessions.FirstOrDefault(s => s.Name == gh.Group.Name);
+            }
         }
 
         return null;
