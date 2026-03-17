@@ -177,10 +177,11 @@ public class AppState
         // Clean up stale entries for groups that no longer exist
         ExpandedGroups.RemoveWhere(n => !currentNames.Contains(n));
         _knownGroupNames.RemoveWhere(n => !currentNames.Contains(n));
-        // Only expand groups we haven't seen before
+        // Auto-expand new groups, but keep worktree groups with no per-repo sessions collapsed
         foreach (var group in Groups)
         {
-            if (_knownGroupNames.Add(group.Name))
+            var hasPerRepoSessions = group.Sessions.Any(s => s != group.Name);
+            if (_knownGroupNames.Add(group.Name) && (hasPerRepoSessions || group.Repos.Count == 0))
                 ExpandedGroups.Add(group.Name);
         }
     }
