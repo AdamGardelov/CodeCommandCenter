@@ -276,7 +276,8 @@ Pick a directory:
 
 **Group with worktrees:** When creating a group (`g`), select "New worktrees (pick repos)" to multi-select repos, enter
 a feature name, and CCC creates worktrees for all of them in a shared folder with a `.feature-context.json` for
-discoverability.
+discoverability. Sessions are **not created eagerly** — repos appear as placeholders in the group, and sessions are
+created on demand when you press `Enter` on a repo item.
 
 ```
 ~/Dev/Wint/worktrees/
@@ -285,6 +286,10 @@ discoverability.
     ├── BankService/               ← worktree
     └── .feature-context.json      ← auto-generated
 ```
+
+**Opening a worktree group:** Press `Enter` on a worktree group header to open a single Claude session at the worktree
+root — giving one session access to all repos. Press `Space` to expand/collapse the group and see individual repos.
+Press `Enter` on a repo item to create a dedicated session for that repo.
 
 These worktrees are also discoverable via the "Existing worktree feature" option when creating groups later.
 
