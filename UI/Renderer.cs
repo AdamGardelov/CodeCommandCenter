@@ -224,36 +224,32 @@ public static class Renderer
         Session? rootSession = hasRootSession
             ? state.Sessions.FirstOrDefault(s => s.Name == group.Name)
             : null;
+        var expandIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
 
         if (isSelected)
         {
             var bg = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey37";
-            // Use raw status text (no nested markup) — same pattern as BuildSessionRow
             var status = rootSession switch
             {
                 { IsWaitingForInput: true } => "!",
                 { IsIdle: true } => "\u2713",
                 not null => spinner,
-                _ => header.IsExpanded ? "\u25bc" : "\u25b6",
+                _ => " ",
             };
-            return new Markup($"[white on {bg}] {status} {name,-14} {countLabel,-4} [/]");
+            return new Markup($"[white on {bg}] {status} {expandIcon} {name,-12} {countLabel,-4} [/]");
         }
 
         if (liveCount == 0 && group.Repos.Count == 0 && !hasRootSession)
-        {
-            var arrow = header.IsExpanded ? "\u25bc" : "\u25b6";
-            return new Markup($" [grey50]{arrow}[/] [grey50 strikethrough]{name,-14}[/] [grey42]{countLabel}[/]");
-        }
+            return new Markup($"   [grey50]{expandIcon}[/] [grey50 strikethrough]{name,-12}[/] [grey42]{countLabel}[/]");
 
-        // Colored status icon for unselected rows
         var statusIcon = rootSession switch
         {
             { IsWaitingForInput: true } => "[yellow bold]![/]",
             { IsIdle: true } => "[grey50]\u2713[/]",
             not null => $"[green]{spinner}[/]",
-            _ => header.IsExpanded ? $"[{colorTag}]\u25bc[/]" : $"[{colorTag}]\u25b6[/]",
+            _ => " ",
         };
-        return new Markup($" {statusIcon} [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]");
+        return new Markup($" {statusIcon} [{colorTag}]{expandIcon}[/] [{colorTag}]{name,-12}[/] [grey50]{countLabel}[/]");
     }
 
     private static Panel BuildPreviewPanel(AppState state, string? capturedPane,
