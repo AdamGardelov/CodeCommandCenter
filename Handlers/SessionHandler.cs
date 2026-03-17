@@ -217,11 +217,24 @@ public class SessionHandler(
         }, state);
     }
 
+    public void Attach(string sessionName)
+    {
+        var session = state.Sessions.FirstOrDefault(s => s.Name == sessionName);
+        if (session == null)
+            return;
+        AttachSession(session);
+    }
+
     public void Attach()
     {
         var session = state.GetSelectedSession();
         if (session == null)
             return;
+        AttachSession(session);
+    }
+
+    private void AttachSession(Session session)
+    {
         if (session.IsOffline)
         {
             state.SetStatus($"Cannot attach — {session.RemoteHostName ?? "host"} is offline");

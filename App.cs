@@ -592,14 +592,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
                     var sessionName = _groupHandler.CreateRepoSession(
                         ri.GroupName, ri.RepoName, ri.RepoPath, _claudeAvailable);
                     if (sessionName != null)
-                    {
-                        var treeItems = _state.GetTreeItems();
-                        var idx = treeItems.FindIndex(t =>
-                            t is TreeItem.SessionItem si && si.Session.Name == sessionName);
-                        if (idx >= 0)
-                            _state.CursorIndex = idx;
-                        _sessionHandler.Attach();
-                    }
+                        _sessionHandler.Attach(sessionName);
                 }
                 return;
             }
@@ -614,21 +607,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
                         {
                             var rootSession = _groupHandler.OpenWorktreeSession(_claudeAvailable);
                             if (rootSession != null)
-                            {
-                                // Find and select the root session, then attach
-                                var session = _state.Sessions.FirstOrDefault(s => s.Name == rootSession);
-                                if (session != null)
-                                {
-                                    // Expand the group so the session is visible
-                                    _state.ExpandedGroups.Add(gh.Group.Name);
-                                    var treeItems = _state.GetTreeItems();
-                                    var idx = treeItems.FindIndex(t =>
-                                        t is TreeItem.SessionItem si && si.Session.Name == rootSession);
-                                    if (idx >= 0)
-                                        _state.CursorIndex = idx;
-                                    _sessionHandler.Attach();
-                                }
-                            }
+                                _sessionHandler.Attach(rootSession);
                         }
                         else
                         {
