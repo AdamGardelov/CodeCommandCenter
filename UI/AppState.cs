@@ -133,9 +133,13 @@ public class AppState
                     .Where(s => groupSessionNames.Contains(s.Name))
                     .ToList();
 
-                // Show live sessions
+                // Show live sessions (exclude the root session — it's accessed via the group header)
                 foreach (var session in groupSessions)
+                {
+                    if (session.Name == group.Name)
+                        continue;
                     items.Add(new TreeItem.SessionItem(session, group.Name));
+                }
 
                 // Show repos that don't have a live session yet
                 if (group.Repos.Count > 0)

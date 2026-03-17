@@ -213,24 +213,37 @@ public static class Renderer
     {
         var group = header.Group;
         var name = Markup.Escape(group.Name);
-        var liveCount = group.Sessions.Count;
-        // Count repos that don't have a live session yet
-        var pendingRepos = group.Repos.Count(r => !group.Sessions.Contains($"{group.Name}-{r.Key}"));
-        var totalCount = liveCount + pendingRepos;
+        // Exclude the root session (same name as group) from the count
+        var liveCount = group.Sessions.Count(s => s != group.Name);
+        var hasRootSession = group.Sessions.Contains(group.Name);
         var expandIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
-        var countLabel = liveCount < totalCount ? $"({liveCount}/{totalCount})" : $"({totalCount})";
+        var countLabel = $"({liveCount})";
         var colorTag = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey50";
+
+        // Show root session status indicator on the group header
+        var rootStatus = "";
+        if (hasRootSession)
+        {
+            var rootSession = state.Sessions.FirstOrDefault(s => s.Name == group.Name);
+            if (rootSession != null)
+            {
+                var spinner = Markup.Escape(GetSpinnerFrame());
+                rootStatus = rootSession.IsWaitingForInput ? " [yellow bold]![/]"
+                    : rootSession.IsIdle ? " [grey50]✓[/]"
+                    : $" [green]{spinner}[/]";
+            }
+        }
 
         if (isSelected)
         {
             var bg = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey37";
-            return new Markup($"[white on {bg}] {expandIcon} {name,-14} {countLabel,-4} [/]");
+            return new Markup($"[white on {bg}] {expandIcon} {name,-14} {countLabel,-4} [/]{rootStatus}");
         }
 
-        if (totalCount == 0)
+        if (liveCount == 0 && group.Repos.Count == 0 && !hasRootSession)
             return new Markup($" [grey50]{expandIcon}[/] [grey50 strikethrough]{name,-14}[/] [grey42]{countLabel}[/]");
 
-        return new Markup($" [{colorTag}]{expandIcon}[/] [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]");
+        return new Markup($" [{colorTag}]{expandIcon}[/] [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]{rootStatus}");
     }
 
     private static Panel BuildPreviewPanel(AppState state, string? capturedPane,
@@ -384,9 +397,11 @@ public static class Renderer
             new Rule().RuleStyle(Style.Parse(colorTag))
         };
 
-        // Show each session in the group with its status
+        // Show each session in the group with its status (exclude root session)
         var groupSessionNames = new HashSet<string>(group.Sessions);
-        var groupSessions = state.Sessions.Where(s => groupSessionNames.Contains(s.Name)).ToList();
+        var groupSessions = state.Sessions
+            .Where(s => groupSessionNames.Contains(s.Name) && s.Name != group.Name)
+            .ToList();
 
         foreach (var session in groupSessions)
         {
