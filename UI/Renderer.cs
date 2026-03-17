@@ -216,34 +216,38 @@ public static class Renderer
         // Exclude the root session (same name as group) from the count
         var liveCount = group.Sessions.Count(s => s != group.Name);
         var hasRootSession = group.Sessions.Contains(group.Name);
-        var expandIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
         var countLabel = liveCount > 0 ? $"({liveCount})" : "";
         var colorTag = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey50";
 
-        // Show root session status indicator on the group header
-        var rootStatus = "";
+        // Status icon: root session status if active, expand/collapse arrow otherwise
+        var spinner = Markup.Escape(GetSpinnerFrame());
+        string statusIcon;
         if (hasRootSession)
         {
             var rootSession = state.Sessions.FirstOrDefault(s => s.Name == group.Name);
-            if (rootSession != null)
+            statusIcon = rootSession switch
             {
-                var spinner = Markup.Escape(GetSpinnerFrame());
-                rootStatus = rootSession.IsWaitingForInput ? " [yellow bold]![/]"
-                    : rootSession.IsIdle ? " [grey50]✓[/]"
-                    : $" [green]{spinner}[/]";
-            }
+                { IsWaitingForInput: true } => "[yellow bold]![/]",
+                { IsIdle: true } => "[grey50]✓[/]",
+                not null => $"[green]{spinner}[/]",
+                _ => header.IsExpanded ? "\u25bc" : "\u25b6",
+            };
+        }
+        else
+        {
+            statusIcon = header.IsExpanded ? "\u25bc" : "\u25b6";
         }
 
         if (isSelected)
         {
             var bg = !string.IsNullOrEmpty(group.Color) ? group.Color : "grey37";
-            return new Markup($"[white on {bg}] {expandIcon} {name,-14} {countLabel,-4} [/]{rootStatus}");
+            return new Markup($"[white on {bg}] {statusIcon} {name,-14} {countLabel,-4} [/]");
         }
 
         if (liveCount == 0 && group.Repos.Count == 0 && !hasRootSession)
-            return new Markup($" [grey50]{expandIcon}[/] [grey50 strikethrough]{name,-14}[/] [grey42]{countLabel}[/]");
+            return new Markup($" [grey50]{statusIcon}[/] [grey50 strikethrough]{name,-14}[/] [grey42]{countLabel}[/]");
 
-        return new Markup($" [{colorTag}]{expandIcon}[/] [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]{rootStatus}");
+        return new Markup($" {statusIcon} [{colorTag}]{name,-14}[/] [grey50]{countLabel}[/]");
     }
 
     private static Panel BuildPreviewPanel(AppState state, string? capturedPane,
