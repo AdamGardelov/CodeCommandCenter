@@ -14,6 +14,10 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
     // Untracked remote sessions discovered during last ListSessions() — available for adoption
     private List<Session> _untrackedRemoteSessions = [];
 
+    // First ListSessions() call = startup. Offline hosts get their cache cleared at startup
+    // since the remote may have been down for days. Mid-session offline is transient — keep cache.
+    private bool _isFirstList = true;
+
     public List<Session> GetUntrackedRemoteSessions() => _untrackedRemoteSessions;
 
     public List<Session> ListSessions()
@@ -33,18 +37,34 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
 
             if (remoteBackend.IsOffline)
             {
-                // Use cached sessions, marked offline so UI greys them out
-                // and DetectWaitingForInputBatch skips SSH calls for them
-                var cached = config.CachedRemoteSessions.GetValueOrDefault(hostName) ?? [];
-                var offlineSessions = cached.Select(c => new Session
+                if (_isFirstList)
                 {
-                    Name = c.Name,
-                    CurrentPath = c.Path,
-                    Created = c.Created,
-                    RemoteHostName = hostName,
-                    IsOffline = true,
-                }).ToList();
-                all.AddRange(offlineSessions);
+                    // Startup: remote is unreachable — clear cached sessions.
+                    // They can be re-adopted when the host comes back online.
+                    var staleNames = tracked
+                        .Where(kv => kv.Value == hostName)
+                        .Select(kv => kv.Key)
+                        .ToList();
+                    foreach (var name in staleNames)
+                        ConfigService.RemoveRemoteHost(config, name);
+                    config.CachedRemoteSessions.Remove(hostName);
+                    if (staleNames.Count > 0)
+                        ConfigService.SaveConfig(config);
+                }
+                else
+                {
+                    // Mid-session offline: transient — show cached sessions greyed out
+                    var cached = config.CachedRemoteSessions.GetValueOrDefault(hostName) ?? [];
+                    var offlineSessions = cached.Select(c => new Session
+                    {
+                        Name = c.Name,
+                        CurrentPath = c.Path,
+                        Created = c.Created,
+                        RemoteHostName = hostName,
+                        IsOffline = true,
+                    }).ToList();
+                    all.AddRange(offlineSessions);
+                }
             }
             else
             {
@@ -74,6 +94,7 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
             }
         }
 
+        _isFirstList = false;
         _untrackedRemoteSessions = untracked;
 
         // Rebuild routing map
