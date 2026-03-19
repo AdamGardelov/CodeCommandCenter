@@ -1,3 +1,3 @@
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public record PullRequest(int Number, string Title, string HeadBranch, string Author, bool IsDraft);

@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Installs Claude Command Center (ccc) on Windows.
+    Installs Code Command Center (ccc) on Windows.
 .DESCRIPTION
     Downloads the latest ccc release from GitHub and installs it to a directory in your PATH.
 .EXAMPLE

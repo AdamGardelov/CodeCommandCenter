@@ -250,7 +250,7 @@ Add at the bottom of FlowHelper.cs (or a new file `Models/PullRequest.cs` — bu
 Actually, add a new file `Models/PullRequest.cs`:
 
 ```csharp
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public record PullRequest(int Number, string Title, string HeadBranch, string Author);
 ```
@@ -378,7 +378,7 @@ public static (List<PullRequest>? Prs, string? Error) ListPullRequests(string re
 }
 ```
 
-Add `using ClaudeCommandCenter.Models;` at the top if not already present.
+Add `using CodeCommandCenter.Models;` at the top if not already present.
 
 **Step 2: Build to verify**
 
@@ -395,7 +395,7 @@ Expected: Build succeeded.
 **Step 1: Create the file**
 
 ```csharp
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class PrReviewPrompts
 {

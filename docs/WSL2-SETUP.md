@@ -1,4 +1,4 @@
-# Setting Up Claude Command Center on WSL2
+# Setting Up Code Command Center on WSL2
 
 A step-by-step guide for getting `ccc` running on Windows, starting from scratch.
 

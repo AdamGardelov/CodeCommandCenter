@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class GitService
 {

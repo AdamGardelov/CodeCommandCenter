@@ -1,6 +1,6 @@
 using Microsoft.Win32.SafeHandles;
 
-namespace ClaudeCommandCenter.Services.ConPty;
+namespace CodeCommandCenter.Services.ConPty;
 
 /// <summary>
 /// Internal state for a single ConPTY-managed session.

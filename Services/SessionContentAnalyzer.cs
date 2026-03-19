@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 /// <summary>
 /// Shared content analysis logic used by both TmuxBackend and ConPtyBackend

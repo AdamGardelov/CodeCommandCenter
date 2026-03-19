@@ -1,4 +1,4 @@
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 /// <summary>
 /// Thread-safe circular buffer for terminal output lines.

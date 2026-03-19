@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 using Spectre.Console;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public class TmuxBackend : ISessionBackend
 {

@@ -1,4 +1,4 @@
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public abstract record TreeItem
 {

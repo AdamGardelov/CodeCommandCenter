@@ -1,6 +1,6 @@
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 /// <summary>
 /// Routes ISessionBackend calls to the correct local or remote backend.

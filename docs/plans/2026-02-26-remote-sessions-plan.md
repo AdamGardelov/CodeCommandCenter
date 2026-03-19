@@ -18,7 +18,7 @@
 **Step 1: Create the model file**
 
 ```csharp
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public class RemoteHost
 {
@@ -88,7 +88,7 @@ feat: add remote host config and session tracking fields
 ```csharp
 using System.Diagnostics;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class SshService
 {
@@ -877,7 +877,7 @@ Edit `~/.ccc/config.json` and add:
     "host": "localhost",
     "worktreeBasePath": "~/worktrees",
     "favoriteFolders": [
-      { "name": "CCC", "path": "~/Dev/Lab/ClaudeCommandCenter" }
+      { "name": "CCC", "path": "~/Dev/Lab/CodeCommandCenter" }
     ]
   }
 ]

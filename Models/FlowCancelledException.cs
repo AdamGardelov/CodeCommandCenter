@@ -1,3 +1,3 @@
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public class FlowCancelledException(string status = "Cancelled") : Exception(status);

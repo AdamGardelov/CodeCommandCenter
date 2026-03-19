@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace ClaudeCommandCenter.Services.ConPty;
+namespace CodeCommandCenter.Services.ConPty;
 
 /// <summary>
 /// P/Invoke declarations for the Windows ConPTY API.

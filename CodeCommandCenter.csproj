@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>ClaudeCommandCenter</RootNamespace>
+    <RootNamespace>CodeCommandCenter</RootNamespace>
     <AssemblyName>ccc</AssemblyName>
     <Version>2.14.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

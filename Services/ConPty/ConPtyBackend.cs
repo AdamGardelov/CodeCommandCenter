@@ -1,10 +1,10 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 using Microsoft.Win32.SafeHandles;
-using static ClaudeCommandCenter.Services.ConPty.NativeMethods;
+using static CodeCommandCenter.Services.ConPty.NativeMethods;
 
-namespace ClaudeCommandCenter.Services.ConPty;
+namespace CodeCommandCenter.Services.ConPty;
 
 public class ConPtyBackend : ISessionBackend
 {

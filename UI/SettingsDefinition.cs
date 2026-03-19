@@ -1,8 +1,8 @@
-using ClaudeCommandCenter.Enums;
-using ClaudeCommandCenter.Models;
-using ClaudeCommandCenter.Services;
+using CodeCommandCenter.Enums;
+using CodeCommandCenter.Models;
+using CodeCommandCenter.Services;
 
-namespace ClaudeCommandCenter.UI;
+namespace CodeCommandCenter.UI;
 
 public static class SettingsDefinition
 {

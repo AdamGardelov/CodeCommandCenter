@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using ClaudeCommandCenter.Enums;
-using ClaudeCommandCenter.Handlers;
-using ClaudeCommandCenter.Models;
-using ClaudeCommandCenter.Services;
-using ClaudeCommandCenter.UI;
+using CodeCommandCenter.Enums;
+using CodeCommandCenter.Handlers;
+using CodeCommandCenter.Models;
+using CodeCommandCenter.Services;
+using CodeCommandCenter.UI;
 using Spectre.Console;
 
-namespace ClaudeCommandCenter;
+namespace CodeCommandCenter;
 
 public class App(ISessionBackend backend, CccConfig config, bool mobileMode = false)
 {
@@ -49,7 +49,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
 
         if (backend.IsInsideHost())
         {
-            AnsiConsole.MarkupLine("[red]ClaudeCommandCenter should run outside the session host.[/]");
+            AnsiConsole.MarkupLine("[red]CodeCommandCenter should run outside the session host.[/]");
             AnsiConsole.MarkupLine("[grey]It manages sessions from the outside. Exit tmux first.[/]");
             return;
         }

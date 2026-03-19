@@ -18,9 +18,9 @@
 **Step 1: Create the TreeItem type**
 
 ```csharp
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public abstract record TreeItem
 {
@@ -201,7 +201,7 @@ public void ClampCursor()
 
 Delete the `ClampGroupCursor()` method entirely.
 
-**Step 9: Remove the `using ClaudeCommandCenter.Enums;` import if ActiveSection was the only enum used from there**
+**Step 9: Remove the `using CodeCommandCenter.Enums;` import if ActiveSection was the only enum used from there**
 
 Check — `ViewMode` is also from Enums, so keep the import.
 
@@ -630,7 +630,7 @@ private void FinishCreation(string groupName)
 }
 ```
 
-**Step 4: Remove the `using ClaudeCommandCenter.Enums;` import**
+**Step 4: Remove the `using CodeCommandCenter.Enums;` import**
 
 Since `ActiveSection` was the only enum used from that namespace in GroupHandler, remove the import. Check if `ViewMode` or other enums are used — if not, remove it.
 

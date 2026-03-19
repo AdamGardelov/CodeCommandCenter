@@ -1,7 +1,7 @@
-using ClaudeCommandCenter.Enums;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Enums;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.UI;
+namespace CodeCommandCenter.UI;
 
 public class AppState
 {

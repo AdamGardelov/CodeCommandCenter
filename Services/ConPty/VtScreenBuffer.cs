@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ClaudeCommandCenter.Services.ConPty;
+namespace CodeCommandCenter.Services.ConPty;
 
 /// <summary>
 /// Minimal virtual terminal screen buffer that interprets VT/ANSI escape sequences

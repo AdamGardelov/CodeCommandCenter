@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Text.Json;
-using ClaudeCommandCenter.Models;
-using ClaudeCommandCenter.Services;
-using ClaudeCommandCenter.UI;
+using CodeCommandCenter.Models;
+using CodeCommandCenter.Services;
+using CodeCommandCenter.UI;
 using Spectre.Console;
 
-namespace ClaudeCommandCenter.Handlers;
+namespace CodeCommandCenter.Handlers;
 
 public class FlowHelper(CccConfig config)
 {

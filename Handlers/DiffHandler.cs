@@ -1,7 +1,7 @@
-using ClaudeCommandCenter.Services;
-using ClaudeCommandCenter.UI;
+using CodeCommandCenter.Services;
+using CodeCommandCenter.UI;
 
-namespace ClaudeCommandCenter.Handlers;
+namespace CodeCommandCenter.Handlers;
 
 public class DiffHandler(AppState state)
 {

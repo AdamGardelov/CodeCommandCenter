@@ -1,6 +1,6 @@
-using ClaudeCommandCenter.Enums;
+using CodeCommandCenter.Enums;
 
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public class SettingsItem
 {

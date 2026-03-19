@@ -14,7 +14,7 @@ No test project exists. Verify changes by building and manual testing.
 
 ## Architecture
 
-**Claude Command Center (ccc)** is a terminal dashboard for managing multiple Claude Code sessions. Single .NET 10
+**Code Command Center (ccc)** is a terminal dashboard for managing multiple Claude Code sessions. Single .NET 10
 executable, single dependency (Spectre.Console). Uses tmux on Linux/macOS, native ConPTY on Windows.
 
 ### Core Loop

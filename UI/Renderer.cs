@@ -1,9 +1,9 @@
-using ClaudeCommandCenter.Enums;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Enums;
+using CodeCommandCenter.Models;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace ClaudeCommandCenter.UI;
+namespace CodeCommandCenter.UI;
 
 public static class Renderer
 {

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class SshControlMasterService
 {

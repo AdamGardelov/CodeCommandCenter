@@ -1,6 +1,6 @@
 using Spectre.Console;
 
-namespace ClaudeCommandCenter.UI;
+namespace CodeCommandCenter.UI;
 
 public struct AnsiState
 {

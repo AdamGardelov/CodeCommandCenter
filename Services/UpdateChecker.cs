@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class UpdateChecker
 {

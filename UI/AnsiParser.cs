@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace ClaudeCommandCenter.UI;
+namespace CodeCommandCenter.UI;
 
 /// <summary>
 /// Converts ANSI escape sequences from tmux capture-pane -e into Spectre.Console renderables.

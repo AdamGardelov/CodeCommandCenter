@@ -1,4 +1,4 @@
-# Claude Command Center (ccc)
+# Code Command Center (ccc)
 
 ### List View
 

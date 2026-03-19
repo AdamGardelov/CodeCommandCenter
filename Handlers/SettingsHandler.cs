@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using ClaudeCommandCenter.Enums;
-using ClaudeCommandCenter.Models;
-using ClaudeCommandCenter.Services;
-using ClaudeCommandCenter.UI;
+using CodeCommandCenter.Enums;
+using CodeCommandCenter.Models;
+using CodeCommandCenter.Services;
+using CodeCommandCenter.UI;
 
-namespace ClaudeCommandCenter.Handlers;
+namespace CodeCommandCenter.Handlers;
 
 public class SettingsHandler(
     AppState state,

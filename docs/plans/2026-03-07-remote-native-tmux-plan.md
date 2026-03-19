@@ -38,7 +38,7 @@ public bool IsOffline { get; set; }
 Create `Models/CachedRemoteSession.cs`:
 
 ```csharp
-namespace ClaudeCommandCenter.Models;
+namespace CodeCommandCenter.Models;
 
 public class CachedRemoteSession
 {
@@ -87,7 +87,7 @@ Create `Services/SshControlMasterService.cs`:
 ```csharp
 using System.Diagnostics;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public static class SshControlMasterService
 {
@@ -326,9 +326,9 @@ Create `Services/RemoteTmuxBackend.cs`:
 
 ```csharp
 using System.Diagnostics;
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 public class RemoteTmuxBackend(RemoteHost remoteHost) : ISessionBackend
 {
@@ -641,9 +641,9 @@ public static void SaveRemoteSessionCache(CccConfig config, string hostName, Lis
 Create `Services/BackendRouter.cs`:
 
 ```csharp
-using ClaudeCommandCenter.Models;
+using CodeCommandCenter.Models;
 
-namespace ClaudeCommandCenter.Services;
+namespace CodeCommandCenter.Services;
 
 /// <summary>
 /// Routes ISessionBackend calls to the correct local or remote backend.
@@ -850,7 +850,7 @@ var app = new App(backend, mobileMode);
 Ensure `Program.cs` has:
 
 ```csharp
-using ClaudeCommandCenter.Services;
+using CodeCommandCenter.Services;
 ```
 
 **Step 4: Build**
