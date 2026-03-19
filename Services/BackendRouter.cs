@@ -110,12 +110,12 @@ public class BackendRouter(ISessionBackend local, Dictionary<string, RemoteTmuxB
     }
 
     public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null,
-        string? remoteHost = null, bool dangerouslySkipPermissions = false)
+        string? remoteHost = null, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         if (remoteHost != null && remotes.TryGetValue(remoteHost, out var remoteBackend))
-            return remoteBackend.CreateSession(name, workingDirectory, claudeConfigDir, null, dangerouslySkipPermissions);
+            return remoteBackend.CreateSession(name, workingDirectory, claudeConfigDir, null, dangerouslySkipPermissions, initialPrompt);
 
-        return local.CreateSession(name, workingDirectory, claudeConfigDir, null, dangerouslySkipPermissions);
+        return local.CreateSession(name, workingDirectory, claudeConfigDir, null, dangerouslySkipPermissions, initialPrompt);
     }
 
     public string? KillSession(string name) => BackendFor(name).KillSession(name);

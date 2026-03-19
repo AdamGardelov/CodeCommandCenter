@@ -610,4 +610,92 @@ public class FlowHelper(CccConfig config)
             _ => key.KeyChar.ToString(),
         };
     }
+
+    public FavoriteFolder? PickGitFavorite()
+    {
+        var gitFavorites = config.FavoriteFolders
+            .Where(f => GitService.IsGitRepo(ConfigService.ExpandPath(f.Path)))
+            .ToList();
+
+        if (gitFavorites.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]No git repos found in favorites[/]");
+            AnsiConsole.MarkupLine("[grey](Press any key)[/]");
+            Console.ReadKey(true);
+            return null;
+        }
+
+        var prompt = new SelectionPrompt<string>()
+            .Title("[grey70]Pick a repo[/]")
+            .PageSize(15)
+            .HighlightStyle(new Style(Color.White, Color.Grey70));
+
+        foreach (var fav in gitFavorites)
+            prompt.AddChoice($"{fav.Name}  [grey50]{fav.Path}[/]");
+        prompt.AddChoice(CancelChoice);
+
+        var selected = AnsiConsole.Prompt(prompt);
+        if (selected == CancelChoice)
+            return null;
+
+        var selectedName = selected.Split("  ")[0];
+        return gitFavorites.FirstOrDefault(f => f.Name == selectedName);
+    }
+
+    public PullRequest? PickPullRequest(string repoPath)
+    {
+        List<PullRequest>? prs = null;
+        string? error = null;
+
+        AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .SpinnerStyle(new Style(Color.Grey70))
+            .Start("[grey70]Fetching open PRs...[/]", _ =>
+            {
+                (prs, error) = GitService.ListPullRequests(repoPath);
+            });
+
+        if (error != null)
+        {
+            AnsiConsole.MarkupLine($"[red]{Markup.Escape(error)}[/]");
+            AnsiConsole.MarkupLine("[grey](Press any key)[/]");
+            Console.ReadKey(true);
+            return null;
+        }
+
+        if (prs == null || prs.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]No open PRs found[/]");
+            AnsiConsole.MarkupLine("[grey](Press any key)[/]");
+            Console.ReadKey(true);
+            return null;
+        }
+
+        var prompt = new SelectionPrompt<string>()
+            .Title("[grey70]Pick a PR to review[/]")
+            .PageSize(15)
+            .HighlightStyle(new Style(Color.White, Color.Grey70));
+
+        foreach (var pr in prs)
+            prompt.AddChoice($"[white]#{pr.Number}[/]  {Markup.Escape(pr.Title)}  [grey50]{Markup.Escape(pr.Author)} → {Markup.Escape(pr.HeadBranch)}[/]");
+        prompt.AddChoice(CancelChoice);
+
+        var selected = AnsiConsole.Prompt(prompt);
+        if (selected == CancelChoice)
+            return null;
+
+        var raw = Markup.Remove(selected);
+        var numberStr = raw.Split(' ', 2)[0].TrimStart('#');
+        if (int.TryParse(numberStr, out var num))
+            return prs.FirstOrDefault(p => p.Number == num);
+
+        return null;
+    }
+
+    public static string? PickRandomUnusedColor(CccConfig config)
+    {
+        var usedColors = new HashSet<string>(config.SessionColors.Values, StringComparer.OrdinalIgnoreCase);
+        var unused = _colorPalette.Where(c => !usedColors.Contains(c.SpectreColor)).ToArray();
+        return unused.Length > 0 ? unused[Random.Shared.Next(unused.Length)].SpectreColor : null;
+    }
 }

@@ -120,6 +120,77 @@ public class SessionHandler(
         }, state);
     }
 
+    public void ReviewPr(bool claudeAvailable)
+    {
+        if (!claudeAvailable)
+        {
+            state.SetStatus("'claude' not found in PATH — install Claude Code first");
+            return;
+        }
+
+        FlowHelper.RunFlow("Review PR", () =>
+        {
+            var totalSteps = 2;
+            var step = 0;
+
+            // Step 1: Pick repo
+            FlowHelper.PrintStep(++step, totalSteps, "Repository");
+            var favorite = flow.PickGitFavorite()
+                           ?? throw new FlowCancelledException();
+
+            var repoPath = ConfigService.ExpandPath(favorite.Path);
+            var repoName = favorite.Name;
+
+            // Step 2: Pick PR
+            FlowHelper.PrintStep(++step, totalSteps, "Pull Request");
+            var pr = flow.PickPullRequest(repoPath)
+                     ?? throw new FlowCancelledException();
+
+            // Create worktree for the PR branch
+            var basePath = ConfigService.ExpandPath(config.WorktreeBasePath);
+            var worktreeDest = Path.Combine(basePath, "reviews", pr.HeadBranch, repoName);
+
+            string? worktreeError = null;
+            AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .SpinnerStyle(new Style(Color.Grey70))
+                .Start($"[grey70]Creating worktree for [white]{Markup.Escape(pr.HeadBranch)}[/]...[/]", _ =>
+                {
+                    GitService.FetchPrune(repoPath);
+
+                    if (Directory.Exists(worktreeDest))
+                        return;
+
+                    var (success, output) = GitService.CreateWorktreeFromExisting(repoPath, worktreeDest, pr.HeadBranch);
+                    if (!success)
+                        worktreeError = output;
+                });
+
+            if (worktreeError != null)
+                throw new FlowCancelledException($"Worktree failed: {worktreeError}");
+
+            // Build session
+            var sessionName = FlowHelper.SanitizeSessionName($"review-{pr.Number}");
+            var existingNames = new HashSet<string>(state.Sessions.Select(s => s.Name));
+            sessionName = FlowHelper.UniqueSessionName(sessionName, existingNames, "-");
+
+            var prompt = PrReviewPrompts.GetPrompt(config.PrReviewLanguage);
+            var claudeConfigDir = ConfigService.ResolveClaudeConfigDir(config, worktreeDest);
+            var error = backend.CreateSession(sessionName, worktreeDest, claudeConfigDir, initialPrompt: prompt);
+            if (error != null)
+                throw new FlowCancelledException(error);
+
+            var color = FlowHelper.PickRandomUnusedColor(config);
+            if (color != null)
+                ConfigService.SaveColor(config, sessionName, color);
+            ConfigService.SaveDescription(config, sessionName, $"PR #{pr.Number}: {pr.Title}");
+            backend.ApplyStatusColor(sessionName, color ?? "grey42");
+            backend.AttachSession(sessionName);
+            loadSessions();
+            resetPaneCache();
+        }, state);
+    }
+
     public void Delete()
     {
         var session = state.GetSelectedSession();

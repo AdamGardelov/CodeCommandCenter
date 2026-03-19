@@ -58,9 +58,14 @@ public static class SshService
     /// Remote: ssh -t host 'cd path && claude'
     /// </summary>
     public static (string FileName, List<string> Args) BuildSessionCommand(
-        string? remoteHost, string workingDirectory, bool dangerouslySkipPermissions = false)
+        string? remoteHost, string workingDirectory, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         var claudeCmd = dangerouslySkipPermissions ? "claude --dangerously-skip-permissions" : "claude";
+        if (initialPrompt != null)
+        {
+            var escaped = initialPrompt.Replace("'", "'\\''");
+            claudeCmd += $" '{escaped}'";
+        }
 
         if (remoteHost == null)
         {

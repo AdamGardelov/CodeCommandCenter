@@ -695,6 +695,9 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
             case "move-to-group":
                 _groupHandler.MoveSessionToGroup();
                 break;
+            case "review-pr":
+                _sessionHandler.ReviewPr(_claudeAvailable);
+                break;
             case "update":
                 if (_state.LatestVersion != null)
                 {

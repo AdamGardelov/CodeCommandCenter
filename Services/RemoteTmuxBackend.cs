@@ -57,9 +57,14 @@ public class RemoteTmuxBackend : ISessionBackend
         return sessions.OrderBy(s => s.Created).ThenBy(s => s.Name).ToList();
     }
 
-    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false)
+    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         var claudeCmd = dangerouslySkipPermissions ? "claude --dangerously-skip-permissions" : "claude";
+        if (initialPrompt != null)
+        {
+            var escaped = initialPrompt.Replace("'", "'\\''");
+            claudeCmd += $" '{escaped}'";
+        }
         // Use tmux -c flag for working directory instead of cd && which gets
         // split by the remote SSH shell (SSH joins ArgumentList into one string)
         var shellCmd = $"bash -lc '{claudeCmd.Replace("'", "'\\''")}'";

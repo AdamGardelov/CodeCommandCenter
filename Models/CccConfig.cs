@@ -19,4 +19,5 @@ public class CccConfig
     public Dictionary<string, List<CachedRemoteSession>> CachedRemoteSessions { get; set; } = new();
     public bool DangerouslySkipPermissions { get; set; }
     public HashSet<string> SkipPermissionsSessions { get; set; } = [];
+    public string PrReviewLanguage { get; set; } = "en";
 }

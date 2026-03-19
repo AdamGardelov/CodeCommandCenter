@@ -51,7 +51,7 @@ public class ConPtyBackend : ISessionBackend
         }
     }
 
-    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false)
+    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         lock (_sessionsLock)
         {
@@ -61,7 +61,7 @@ public class ConPtyBackend : ISessionBackend
 
         try
         {
-            var session = StartProcess(name, workingDirectory, claudeConfigDir, remoteHost, dangerouslySkipPermissions);
+            var session = StartProcess(name, workingDirectory, claudeConfigDir, remoteHost, dangerouslySkipPermissions, initialPrompt);
             lock (_sessionsLock)
             {
                 if (!_sessions.TryAdd(name, session))
@@ -345,7 +345,7 @@ public class ConPtyBackend : ISessionBackend
         }
     }
 
-    private static ConPtySession StartProcess(string name, string workingDirectory, string? claudeConfigDir, string? remoteHost, bool dangerouslySkipPermissions = false)
+    private static ConPtySession StartProcess(string name, string workingDirectory, string? claudeConfigDir, string? remoteHost, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         // Create pipes: CCC writes to inputWrite → process reads from inputRead
         //               Process writes to outputWrite → CCC reads from outputRead
@@ -418,13 +418,19 @@ public class ConPtyBackend : ISessionBackend
             string processWorkDir;
             if (remoteHost != null)
             {
-                var (sshFile, sshArgs) = SshService.BuildSessionCommand(remoteHost, workingDirectory, dangerouslySkipPermissions);
+                var (sshFile, sshArgs) = SshService.BuildSessionCommand(remoteHost, workingDirectory, dangerouslySkipPermissions, initialPrompt);
                 commandLine = $"{sshFile} {string.Join(" ", sshArgs.ConvertAll(QuoteWindowsArg))}";
                 processWorkDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
             else
             {
-                commandLine = dangerouslySkipPermissions ? "claude --dangerously-skip-permissions" : "claude";
+                var claudeCmd = dangerouslySkipPermissions ? "claude --dangerously-skip-permissions" : "claude";
+                if (initialPrompt != null)
+                {
+                    var escaped = initialPrompt.Replace("\"", "\\\"");
+                    claudeCmd += $" \"{escaped}\"";
+                }
+                commandLine = claudeCmd;
                 processWorkDir = workingDirectory;
             }
 

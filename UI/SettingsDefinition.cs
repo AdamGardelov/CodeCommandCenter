@@ -56,6 +56,18 @@ public static class SettingsDefinition
             GetValue = c => c.WorktreeBasePath,
             SetValue = (c, v) => c.WorktreeBasePath = v,
         },
+        new()
+        {
+            Label = "PR Review Language",
+            Type = SettingsItemType.Text,
+            GetValue = c => c.PrReviewLanguage,
+            SetValue = (c, v) =>
+            {
+                var normalized = v.Trim().ToLowerInvariant();
+                if (normalized is "en" or "sv")
+                    c.PrReviewLanguage = normalized;
+            },
+        },
     ];
 
     private static List<SettingsItem> BuildKeybindingItems(CccConfig config)

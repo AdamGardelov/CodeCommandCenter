@@ -26,6 +26,7 @@ A terminal UI for managing multiple Claude Code sessions. Run dozens of Claude a
 - **Session groups** — organize related sessions together, create them in bulk from git worktrees, open a single session for the entire worktree
 - **Git worktree integration** — create worktrees on the fly, one branch per session, shared feature folders with auto-discovery
 - **Git diff view** — see what changed since a session started, with full colorized scrollable diff overlay
+- **PR review** — pick a repo, pick a PR, get a review worktree with Claude pre-loaded with a review prompt
 - **Notifications** — terminal bell, OSC, and desktop notifications when sessions go idle
 - **Remote sessions** — run Claude on remote machines via SSH, managed from your local dashboard
 - **Cross-platform** — tmux on Linux/macOS (sessions persist), native ConPTY on Windows (no WSL needed)
@@ -192,6 +193,7 @@ between cells. Press `Escape` to return to list view.
 | `x`                | Exclude/restore session from grid view                           |
 | `m`                | Move standalone session to a group                               |
 | `a`                | Adopt an untracked remote session into CCC                       |
+| `p`                | Review a PR — pick repo, pick PR, create review worktree         |
 | `r`                | Refresh session list                                             |
 | `Y`                | Approve — sends `y` to the selected session                      |
 | `N`                | Reject — sends `n` to the selected session                       |
@@ -293,6 +295,14 @@ Press `Enter` on a repo item to create a dedicated session for that repo.
 
 These worktrees are also discoverable via the "Existing worktree feature" option when creating groups later.
 
+### PR Review
+
+Press `p` to start a PR review flow. CCC walks you through picking a repo from your favorites, fetching open PRs via
+`gh pr list`, and selecting one to review. It then creates a dedicated worktree under `reviews/{pr-branch}` with the PR
+branch checked out and launches a Claude session with a review prompt pre-loaded.
+
+The review prompt language defaults to English. Set `prReviewLanguage` to `"sv"` in your config to use Swedish instead.
+
 ### Configuration
 
 Create `~/.ccc/config.json` to configure favorite folders. When creating a new session, you'll be able to pick from this
@@ -325,6 +335,7 @@ list instead of typing a full path.
 | `claudeConfigRoutes`      | `[]`                    | Directory-based Claude config routing (see below)                 |
 | `defaultClaudeConfigDir`  | ``                      | Fallback `CLAUDE_CONFIG_DIR` when no route matches                |
 | `remoteHosts`             | `[]`                    | SSH remote machines for running sessions (see below)              |
+| `prReviewLanguage`        | `"en"`                  | Language for PR review prompts (`"en"` or `"sv"`)                 |
 
 The config file is created automatically on first run. Tilde (`~`) paths are expanded automatically.
 
@@ -457,6 +468,7 @@ Each override supports three optional fields:
 | `toggle-exclude` | `x`         | hide          | Yes         |
 | `move-to-group`  | `m`         | move          | Yes         |
 | `adopt-remote`   | `a`         | adopt         | Yes         |
+| `review-pr`     | `p`         | review        | Yes         |
 | `toggle-expand`  | `Space`     | (hidden)      | No          |
 | `toggle-grid`    | `Ctrl+G`    | grid          | Yes         |
 | `toggle-diff`    | `D`         | diff          | Yes         |

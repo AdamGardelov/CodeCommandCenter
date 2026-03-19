@@ -175,6 +175,70 @@ public static class GitService
         return success ? output : null;
     }
 
+    public static (List<PullRequest>? Prs, string? Error) ListPullRequests(string repoPath)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "gh",
+                WorkingDirectory = repoPath,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+            startInfo.ArgumentList.Add("pr");
+            startInfo.ArgumentList.Add("list");
+            startInfo.ArgumentList.Add("--json");
+            startInfo.ArgumentList.Add("number,title,headRefName,author");
+            startInfo.ArgumentList.Add("--limit");
+            startInfo.ArgumentList.Add("30");
+
+            using var process = Process.Start(startInfo);
+            if (process == null)
+                return (null, "Failed to start gh");
+
+            var stdout = process.StandardOutput.ReadToEnd();
+            var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+                return (null, string.IsNullOrWhiteSpace(stderr) ? "gh pr list failed" : stderr.Trim());
+
+            var prs = new List<PullRequest>();
+            using var doc = System.Text.Json.JsonDocument.Parse(stdout);
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                var number = el.GetProperty("number").GetInt32();
+                var title = el.GetProperty("title").GetString() ?? "";
+                var branch = el.GetProperty("headRefName").GetString() ?? "";
+                var author = el.GetProperty("author").TryGetProperty("login", out var login)
+                    ? login.GetString() ?? ""
+                    : "";
+                prs.Add(new PullRequest(number, title, branch, author));
+            }
+
+            return (prs, null);
+        }
+        catch (Exception ex)
+        {
+            return (null, $"gh not available: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Creates a worktree that checks out an existing remote branch (for PR review).
+    /// </summary>
+    public static (bool Success, string? Output) CreateWorktreeFromExisting(string repoPath, string worktreeDest, string branchName)
+    {
+        // Fetch the specific branch from origin
+        RunGit(repoPath, "fetch", "origin", $"{branchName}:{branchName}");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(worktreeDest)!);
+        return RunGit(repoPath, "worktree", "add", worktreeDest, branchName);
+    }
+
     private static (bool Success, string? Output) RunGit(string workingDirectory, params string[] args)
     {
         try

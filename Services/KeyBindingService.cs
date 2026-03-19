@@ -104,6 +104,14 @@ public static class KeyBindingService
             CanDisable = true,
             StatusBarOrder = 26
         },
+        new()
+        {
+            ActionId = "review-pr",
+            Key = "p",
+            Label = "review",
+            CanDisable = true,
+            StatusBarOrder = 27
+        },
         // Group 3: Open (navigate to things)
         new()
         {

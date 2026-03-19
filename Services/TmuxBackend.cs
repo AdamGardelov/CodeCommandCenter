@@ -40,7 +40,7 @@ public class TmuxBackend : ISessionBackend
         return sessions.OrderBy(s => s.Created).ThenBy(s => s.Name).ToList();
     }
 
-    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false)
+    public string? CreateSession(string name, string workingDirectory, string? claudeConfigDir = null, string? remoteHost = null, bool dangerouslySkipPermissions = false, string? initialPrompt = null)
     {
         var envArgs = new List<string> { "-e", $"CCC_SESSION_NAME={name}" };
         if (!string.IsNullOrEmpty(claudeConfigDir))
@@ -49,7 +49,7 @@ public class TmuxBackend : ISessionBackend
             envArgs.Add($"CLAUDE_CONFIG_DIR={claudeConfigDir}");
         }
 
-        var (cmdFile, cmdArgs) = SshService.BuildSessionCommand(remoteHost, workingDirectory, dangerouslySkipPermissions);
+        var (cmdFile, cmdArgs) = SshService.BuildSessionCommand(remoteHost, workingDirectory, dangerouslySkipPermissions, initialPrompt);
         // Shell-quote any arg containing spaces or & so that tmux's command string re-parsing
         // keeps multi-word args (e.g. "claude --dangerously-skip-permissions") as a single token.
         var quotedArgs = cmdArgs.ConvertAll(a => a.Contains(' ') || a.Contains('&') ? $"\"{a}\"" : a);
