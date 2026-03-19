@@ -143,7 +143,7 @@ public class SessionHandler(
 
             // Step 2: Pick PR
             FlowHelper.PrintStep(++step, totalSteps, "Pull Request");
-            var pr = flow.PickPullRequest(repoPath)
+            var pr = flow.PickPullRequest(repoPath, config.PrIncludeDrafts)
                      ?? throw new FlowCancelledException();
 
             // Create worktree for the PR branch

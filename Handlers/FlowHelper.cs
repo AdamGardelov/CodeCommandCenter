@@ -642,7 +642,7 @@ public class FlowHelper(CccConfig config)
         return gitFavorites.FirstOrDefault(f => f.Name == selectedName);
     }
 
-    public PullRequest? PickPullRequest(string repoPath)
+    public PullRequest? PickPullRequest(string repoPath, bool includeDrafts = false)
     {
         List<PullRequest>? prs = null;
         string? error = null;
@@ -652,7 +652,7 @@ public class FlowHelper(CccConfig config)
             .SpinnerStyle(new Style(Color.Grey70))
             .Start("[grey70]Fetching open PRs...[/]", _ =>
             {
-                (prs, error) = GitService.ListPullRequests(repoPath);
+                (prs, error) = GitService.ListPullRequests(repoPath, includeDrafts);
             });
 
         if (error != null)
@@ -677,7 +677,10 @@ public class FlowHelper(CccConfig config)
             .HighlightStyle(new Style(Color.White, Color.Grey70));
 
         foreach (var pr in prs)
-            prompt.AddChoice($"[white]#{pr.Number}[/]  {Markup.Escape(pr.Title)}  [grey50]{Markup.Escape(pr.Author)} → {Markup.Escape(pr.HeadBranch)}[/]");
+        {
+            var draft = pr.IsDraft ? " [grey50](draft)[/]" : "";
+            prompt.AddChoice($"[white]#{pr.Number}[/]  {Markup.Escape(pr.Title)}{draft}  [grey50]{Markup.Escape(pr.Author)} → {Markup.Escape(pr.HeadBranch)}[/]");
+        }
         prompt.AddChoice(CancelChoice);
 
         var selected = AnsiConsole.Prompt(prompt);

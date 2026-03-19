@@ -175,7 +175,7 @@ public static class GitService
         return success ? output : null;
     }
 
-    public static (List<PullRequest>? Prs, string? Error) ListPullRequests(string repoPath)
+    public static (List<PullRequest>? Prs, string? Error) ListPullRequests(string repoPath, bool includeDrafts = false)
     {
         try
         {
@@ -191,7 +191,7 @@ public static class GitService
             startInfo.ArgumentList.Add("pr");
             startInfo.ArgumentList.Add("list");
             startInfo.ArgumentList.Add("--json");
-            startInfo.ArgumentList.Add("number,title,headRefName,author");
+            startInfo.ArgumentList.Add("number,title,headRefName,author,isDraft");
             startInfo.ArgumentList.Add("--limit");
             startInfo.ArgumentList.Add("30");
 
@@ -210,13 +210,17 @@ public static class GitService
             using var doc = System.Text.Json.JsonDocument.Parse(stdout);
             foreach (var el in doc.RootElement.EnumerateArray())
             {
+                var isDraft = el.TryGetProperty("isDraft", out var draftProp) && draftProp.GetBoolean();
+                if (!includeDrafts && isDraft)
+                    continue;
+
                 var number = el.GetProperty("number").GetInt32();
                 var title = el.GetProperty("title").GetString() ?? "";
                 var branch = el.GetProperty("headRefName").GetString() ?? "";
                 var author = el.GetProperty("author").TryGetProperty("login", out var login)
                     ? login.GetString() ?? ""
                     : "";
-                prs.Add(new PullRequest(number, title, branch, author));
+                prs.Add(new PullRequest(number, title, branch, author, isDraft));
             }
 
             return (prs, null);

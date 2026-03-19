@@ -20,4 +20,5 @@ public class CccConfig
     public bool DangerouslySkipPermissions { get; set; }
     public HashSet<string> SkipPermissionsSessions { get; set; } = [];
     public string PrReviewLanguage { get; set; } = "en";
+    public bool PrIncludeDrafts { get; set; }
 }

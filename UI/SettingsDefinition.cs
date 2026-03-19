@@ -22,6 +22,12 @@ public static class SettingsDefinition
         },
         new()
         {
+            Name = "Pull Requests",
+            Icon = "⑂",
+            BuildItems = BuildPullRequestItems,
+        },
+        new()
+        {
             Name = "Notifications",
             Icon = "🔔",
             BuildItems = BuildNotificationItems,
@@ -56,9 +62,13 @@ public static class SettingsDefinition
             GetValue = c => c.WorktreeBasePath,
             SetValue = (c, v) => c.WorktreeBasePath = v,
         },
+    ];
+
+    private static List<SettingsItem> BuildPullRequestItems(CccConfig config) =>
+    [
         new()
         {
-            Label = "PR Review Language",
+            Label = "Review Language",
             Type = SettingsItemType.Text,
             GetValue = c => c.PrReviewLanguage,
             SetValue = (c, v) =>
@@ -67,6 +77,13 @@ public static class SettingsDefinition
                 if (normalized is "en" or "sv")
                     c.PrReviewLanguage = normalized;
             },
+        },
+        new()
+        {
+            Label = "Include Drafts",
+            Type = SettingsItemType.Toggle,
+            GetValue = c => c.PrIncludeDrafts ? "ON" : "OFF",
+            SetValue = (c, _) => c.PrIncludeDrafts = !c.PrIncludeDrafts,
         },
     ];
 
