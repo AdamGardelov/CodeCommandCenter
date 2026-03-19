@@ -54,7 +54,7 @@ public static class SshService
 
     /// <summary>
     /// Builds the filename and arguments for launching a Claude session.
-    /// Local: shell -lc claude
+    /// Local: shell -lic claude (interactive so .bashrc/.zshrc functions are available)
     /// Remote: ssh -t host 'cd path && claude'
     /// </summary>
     public static (string FileName, List<string> Args) BuildSessionCommand(
@@ -70,7 +70,7 @@ public static class SshService
         if (remoteHost == null)
         {
             var shell = Environment.GetEnvironmentVariable("SHELL") ?? "/bin/bash";
-            return (shell, ["-lc", claudeCmd]);
+            return (shell, ["-lic", claudeCmd]);
         }
 
         // Wrap in exec $SHELL -lc so the remote gets a login shell (loads PATH etc.)
