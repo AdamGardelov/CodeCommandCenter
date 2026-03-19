@@ -170,6 +170,7 @@ public static class SettingsDefinition
             {
                 Label = config.FavoriteFolders[index].Name,
                 Type = SettingsItemType.Text,
+                FavoriteIndex = index,
                 GetValue = c => index < c.FavoriteFolders.Count
                     ? c.FavoriteFolders[index].Path
                     : "",
@@ -183,6 +184,7 @@ public static class SettingsDefinition
             {
                 Label = $"  └ Default Branch",
                 Type = SettingsItemType.Text,
+                FavoriteIndex = index,
                 GetValue = c => index < c.FavoriteFolders.Count
                     ? c.FavoriteFolders[index].DefaultBranch
                     : "",
@@ -199,6 +201,69 @@ public static class SettingsDefinition
             Label = "+ Add Favorite",
             Type = SettingsItemType.Action,
         });
+
+        foreach (var host in config.RemoteHosts)
+        {
+            var hostName = host.Name;
+            items.Add(new SettingsItem
+            {
+                Label = $"── {hostName} ──",
+                Type = SettingsItemType.Action,
+                RemoteHostName = hostName,
+            });
+
+            for (var i = 0; i < host.FavoriteFolders.Count; i++)
+            {
+                var index = i;
+                items.Add(new SettingsItem
+                {
+                    Label = host.FavoriteFolders[index].Name,
+                    Type = SettingsItemType.Text,
+                    RemoteHostName = hostName,
+                    FavoriteIndex = index,
+                    GetValue = c =>
+                    {
+                        var h = c.RemoteHosts.FirstOrDefault(r => r.Name == hostName);
+                        return h != null && index < h.FavoriteFolders.Count
+                            ? h.FavoriteFolders[index].Path
+                            : "";
+                    },
+                    SetValue = (c, v) =>
+                    {
+                        var h = c.RemoteHosts.FirstOrDefault(r => r.Name == hostName);
+                        if (h != null && index < h.FavoriteFolders.Count)
+                            h.FavoriteFolders[index].Path = v;
+                    },
+                });
+                items.Add(new SettingsItem
+                {
+                    Label = $"  └ Default Branch",
+                    Type = SettingsItemType.Text,
+                    RemoteHostName = hostName,
+                    FavoriteIndex = index,
+                    GetValue = c =>
+                    {
+                        var h = c.RemoteHosts.FirstOrDefault(r => r.Name == hostName);
+                        return h != null && index < h.FavoriteFolders.Count
+                            ? h.FavoriteFolders[index].DefaultBranch
+                            : "";
+                    },
+                    SetValue = (c, v) =>
+                    {
+                        var h = c.RemoteHosts.FirstOrDefault(r => r.Name == hostName);
+                        if (h != null && index < h.FavoriteFolders.Count)
+                            h.FavoriteFolders[index].DefaultBranch = v;
+                    },
+                });
+            }
+
+            items.Add(new SettingsItem
+            {
+                Label = "+ Add Remote Favorite",
+                Type = SettingsItemType.Action,
+                RemoteHostName = hostName,
+            });
+        }
 
         return items;
     }

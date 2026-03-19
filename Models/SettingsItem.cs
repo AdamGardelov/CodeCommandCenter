@@ -9,4 +9,6 @@ public class SettingsItem
     public Func<CccConfig, string>? GetValue { get; init; }
     public Action<CccConfig, string>? SetValue { get; init; }
     public string? ActionId { get; init; }
+    public string? RemoteHostName { get; init; }
+    public int? FavoriteIndex { get; init; }
 }

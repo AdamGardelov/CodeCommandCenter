@@ -116,13 +116,14 @@ public class SettingsHandler(
         // Favorites shortcuts
         if (state.SettingsFocusRight && currentCategory.Name == "Favorites")
         {
+            var currentItem = state.SettingsItemCursor < items.Count ? items[state.SettingsItemCursor] : null;
             switch (key.KeyChar)
             {
                 case 'n':
-                    AddFavorite();
+                    AddFavorite(currentItem?.RemoteHostName);
                     return;
                 case 'd':
-                    DeleteFavorite();
+                    DeleteFavorite(items);
                     return;
             }
         }
@@ -243,14 +244,14 @@ public class SettingsHandler(
                 break;
 
             case SettingsItemType.Action:
-                HandleAction(item.Label);
+                HandleAction(item);
                 break;
         }
     }
 
-    private void HandleAction(string label)
+    private void HandleAction(SettingsItem item)
     {
-        switch (label)
+        switch (item.Label)
         {
             case "Open Config File":
                 OpenConfig();
@@ -273,47 +274,84 @@ public class SettingsHandler(
 
                 break;
             case "+ Add Favorite":
-                AddFavorite();
+                AddFavorite(null);
+                break;
+            case "+ Add Remote Favorite":
+                AddFavorite(item.RemoteHostName);
                 break;
         }
     }
 
-    private void AddFavorite() => FlowHelper.RunFlow("Add Favorite", () =>
+    private void AddFavorite(string? remoteHostName)
     {
-        FlowHelper.PrintStep(1, 2, "Name");
-        var name = FlowHelper.RequireText("[grey70]Name:[/]");
-
-        FlowHelper.PrintStep(2, 2, "Path");
-        var path = FlowHelper.RequireText("[grey70]Path:[/]");
-
-        config.FavoriteFolders.Add(new FavoriteFolder
+        var label = remoteHostName != null ? $"Add Favorite ({remoteHostName})" : "Add Favorite";
+        FlowHelper.RunFlow(label, () =>
         {
-            Name = name,
-            Path = path
-        });
-        ConfigService.SaveConfig(config);
-        state.SetStatus($"Added '{name}'");
-    }, state);
+            FlowHelper.PrintStep(1, 2, "Name");
+            var name = FlowHelper.RequireText("[grey70]Name:[/]");
 
-    private void DeleteFavorite()
+            FlowHelper.PrintStep(2, 2, "Path");
+            var path = FlowHelper.RequireText("[grey70]Path:[/]");
+
+            if (remoteHostName != null)
+            {
+                var host = config.RemoteHosts.FirstOrDefault(h => h.Name == remoteHostName);
+                if (host == null)
+                {
+                    state.SetStatus($"Host '{remoteHostName}' not found");
+                    return;
+                }
+
+                host.FavoriteFolders.Add(new FavoriteFolder { Name = name, Path = path });
+            }
+            else
+            {
+                config.FavoriteFolders.Add(new FavoriteFolder { Name = name, Path = path });
+            }
+
+            ConfigService.SaveConfig(config);
+            state.SetStatus($"Added '{name}'");
+        }, state);
+    }
+
+    private void DeleteFavorite(List<SettingsItem> items)
     {
-        // Each favorite produces 2 items (name + default branch), so map cursor to favorite index
-        var favoriteIndex = state.SettingsItemCursor / 2;
-        if (favoriteIndex >= config.FavoriteFolders.Count)
+        if (state.SettingsItemCursor >= items.Count)
             return;
 
-        var fav = config.FavoriteFolders[favoriteIndex];
+        var currentItem = items[state.SettingsItemCursor];
+        if (currentItem.FavoriteIndex == null)
+            return;
+
+        var favoriteIndex = currentItem.FavoriteIndex.Value;
+        var remoteHostName = currentItem.RemoteHostName;
+
+        List<FavoriteFolder> favorites;
+        if (remoteHostName != null)
+        {
+            var host = config.RemoteHosts.FirstOrDefault(h => h.Name == remoteHostName);
+            if (host == null)
+                return;
+            favorites = host.FavoriteFolders;
+        }
+        else
+        {
+            favorites = config.FavoriteFolders;
+        }
+
+        if (favoriteIndex >= favorites.Count)
+            return;
+
+        var fav = favorites[favoriteIndex];
         state.SetStatus($"Delete '{fav.Name}'? (y/n)");
         render();
 
         var confirm = Console.ReadKey(true);
         if (confirm.Key == ConsoleKey.Y)
         {
-            config.FavoriteFolders.RemoveAt(favoriteIndex);
+            favorites.RemoveAt(favoriteIndex);
             ConfigService.SaveConfig(config);
-            // Reset cursor to the start of the previous favorite, or 0
-            state.SettingsItemCursor = Math.Min(favoriteIndex * 2,
-                Math.Max(0, config.FavoriteFolders.Count * 2 - 1));
+            state.SettingsItemCursor = Math.Max(0, state.SettingsItemCursor - 2);
             state.SetStatus("Deleted");
         }
         else
