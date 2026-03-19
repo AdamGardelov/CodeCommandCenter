@@ -70,7 +70,7 @@ On first run, `claude` will prompt you to authenticate with your Anthropic accou
 ### Option A: From Release (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.sh | bash
 ```
 
 ### Option B: From Source
@@ -86,8 +86,8 @@ sudo apt install -y dotnet-sdk-10.0
 Then build and install:
 
 ```bash
-git clone https://github.com/AdamGardelov/ClaudeCommandCenter.git
-cd ClaudeCommandCenter
+git clone https://github.com/AdamGardelov/code-command-center.git
+cd code-command-center
 dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -o dist
 sudo cp dist/ccc /usr/local/bin/ccc
 ```

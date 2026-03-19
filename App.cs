@@ -1070,7 +1070,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
 
         if (OperatingSystem.IsWindows())
         {
-            var script = "irm https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.ps1 | iex";
+            var script = "irm https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.ps1 | iex";
             var process = Process.Start(new ProcessStartInfo
             {
                 FileName = "powershell",
@@ -1087,7 +1087,7 @@ public class App(ISessionBackend backend, CccConfig config, bool mobileMode = fa
                 ArgumentList =
                 {
                     "-c",
-                    "curl -fsSL https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.sh | bash"
+                    "curl -fsSL https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.sh | bash"
                 },
                 UseShellExecute = false,
             });

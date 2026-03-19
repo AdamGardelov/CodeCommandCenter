@@ -5,12 +5,12 @@
 .DESCRIPTION
     Downloads the latest ccc release from GitHub and installs it to a directory in your PATH.
 .EXAMPLE
-    irm https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.ps1 | iex
+    irm https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.ps1 | iex
 #>
 
 $ErrorActionPreference = 'Stop'
 
-$repo = 'AdamGardelov/ClaudeCommandCenter'
+$repo = 'AdamGardelov/code-command-center'
 $installDir = Join-Path $env:LOCALAPPDATA 'Programs\ccc'
 $binary = 'ccc.exe'
 

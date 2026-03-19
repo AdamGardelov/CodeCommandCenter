@@ -60,7 +60,7 @@ dotnet build
 Download and install the latest release automatically (Linux / macOS):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.sh | bash
 ```
 
 This detects your platform (Linux, macOS Intel/ARM), downloads the latest release, and installs to `/usr/local/bin`.
@@ -68,7 +68,7 @@ This detects your platform (Linux, macOS Intel/ARM), downloads the latest releas
 Windows (PowerShell):
 
 ```powershell
-irm https://raw.githubusercontent.com/AdamGardelov/ClaudeCommandCenter/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/AdamGardelov/code-command-center/main/install.ps1 | iex
 ```
 
 This downloads the latest release and installs to `%LOCALAPPDATA%\Programs\ccc`, adding it to your PATH automatically.

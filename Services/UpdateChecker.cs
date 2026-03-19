@@ -13,7 +13,7 @@ public static class UpdateChecker
         DefaultRequestHeaders =
         {
             {
-                "User-Agent", "ClaudeCommandCenter"
+                "User-Agent", "code-command-center"
             }
         },
     };
@@ -27,7 +27,7 @@ public static class UpdateChecker
         try
         {
             var json = await _http.GetStringAsync(
-                "https://api.github.com/repos/AdamGardelov/ClaudeCommandCenter/releases/latest");
+                "https://api.github.com/repos/AdamGardelov/code-command-center/releases/latest");
 
             using var doc = JsonDocument.Parse(json);
             var tagName = doc.RootElement.GetProperty("tag_name").GetString();

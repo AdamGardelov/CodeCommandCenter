@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="AdamGardelov/ClaudeCommandCenter"
+REPO="AdamGardelov/code-command-center"
 INSTALL_DIR="/usr/local/bin"
 BINARY="ccc"
 

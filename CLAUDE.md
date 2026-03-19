@@ -133,4 +133,4 @@ keybindings table, config options, and feature descriptions must stay in sync wi
 
 ## Version
 
-Bumped in `ClaudeCommandCenter.csproj` `<Version>` property. CI auto-calculates from git tags + commit messages.
+Bumped in the `.csproj` `<Version>` property. CI auto-calculates from git tags + commit messages.
